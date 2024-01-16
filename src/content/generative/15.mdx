@@ -1,0 +1,43 @@
+---
+  pubDate: 'Mar 29 2020'
+  status: 'published'
+  title: '#15 - Prodigy'
+  heroImage: '/imgs/prodigy.jpg'
+  slug: 'prodigy'
+  categories: ['generative-art', 'javascript']
+  fork: [
+    {
+      title: 'Codepen',
+      url: 'https://codepen.io/TheodoreVorillas/full/KKwEOYR'
+    }
+  ]
+  excerpt: 'Symmetry with Perlin Noise'
+---
+
+Creating progressive animations using Perlin noise can produce linear, visually aesthetic and somehow more natural results, especially for abstract artistic results.
+
+Perlin noise can produce pseudo-random values within a frame of time with smooth results, basically, using Ken Perlin's algorithm we can create a deterministic vertex within a timeframe. In this example, I have tried to recreate the feeling of a continuous moving blob.
+Enjoy.
+
+## The algorithm
+
+```javascript
+p.blob = (size, xCenter, yCenter, k, t, noisiness) => {
+  p.beginShape();
+  let angleStep = 360 / 500;
+  let r, r1, r2, x, y;
+  for (let theta = 0; theta <= 361; theta += angleStep) {
+    r1 = p.cos(theta) + 1;
+    r2 = p.sin(theta) + 1;
+    r = size + p.noise(k * r1, k * r2, t) * noisiness;
+    x = xCenter + r * p.cos(theta);
+    y = yCenter + r * p.sin(theta);
+    p.curveVertex(x, y);
+  }
+  p.endShape(p.CLOSE);
+};
+```
+
+## References
+
+- [Processing and Perlin Noise](https://www.youtube.com/watch?v=8ZEMLCnn8v0)

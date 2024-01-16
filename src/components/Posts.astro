@@ -1,0 +1,52 @@
+---
+import type { CollectionEntry } from "astro:content";
+import PostLayout from "@/layouts/PostLayout.astro";
+import Pagination from "./Pagination.astro";
+import { toDateString } from "@/lib/date";
+
+export interface Props {
+  currentPage: number;
+  totalPages: number;
+  paginatedPosts: CollectionEntry<"blog">[];
+}
+const { currentPage, totalPages, paginatedPosts } = Astro.props;
+const title = currentPage < 2 ? "Writing." : `Writing. - Page ${currentPage}`;
+---
+
+<PostLayout title={title}>
+  <div class="container flex flex-col max-w-[64rem] mb-10">
+    <h1 class="mb-10">
+      <span class="text-4xl font-bold">Writing.</span>
+    </h1>
+
+    <ul class="flex flex-col gap-7">
+      {
+        paginatedPosts.map(({ data, slug }) => (
+          <li>
+            <a href={`/${slug}`}>
+              <span class="flex place-content-between  gap-10">
+                <span class="flex flex-col gap-2">
+                  <span>{data.title}</span>
+                </span>
+                <time class="opacity-50 text-sm date text-right">
+                  {toDateString(data.pubDate)}
+                </time>
+              </span>
+            </a>
+            <div class="opacity-50 max-w-lg mt-1">{data.description}</div>
+          </li>
+        ))
+      }
+    </ul>
+    <div>
+      <Pagination
+        {currentPage}
+        {totalPages}
+        prevUrl={`/posts${
+          currentPage - 1 !== 1 ? "/" + (currentPage - 1) : ""
+        }`}
+        nextUrl={`/posts/${currentPage + 1}`}
+      />
+    </div>
+  </div>
+</PostLayout>

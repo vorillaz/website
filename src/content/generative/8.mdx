@@ -1,0 +1,34 @@
+---
+  pubDate: 'Apr 22 2019'
+  status: 'published'
+  title: '#8 - The Thomas Attractor'
+  heroImage: '/imgs/thomas-attractor.jpg'
+  slug: 'thomas-attractor'
+  categories: ['generative-art', 'javascript']
+  fork: [{
+    title: 'Codepen',
+    url: 'https://codepen.io/TheodoreVorillas/pen/BEPvWO'
+  }]
+  excerpt: 'Deterministic Labyrinth Chaos.'
+---
+
+In the dynamical systems theory, Thomas' cyclically symmetric attractor is a 3D strange attractor originally proposed by René Thomas.
+It has a simple form which is cyclically symmetric in the x,y, and z variables and can be viewed as the trajectory of a frictionally dampened particle moving in a 3D lattice of forces. The simple form has made it a popular example.
+
+## The algorithm
+
+```javascript title="thomas-attractor.js"
+const b = 0.19;
+
+const next = (x,y,z) => {
+  const dx = -b * x + Math.sin(y);
+  const dy = -b * y + Math.sin(z);
+  const dz = -b * z + Math.sin(x);
+  return {dx,dy,dz};
+};
+```
+
+## References
+- [Thomas' cyclically symmetric attractor](https://en.wikipedia.org/wiki/Thomas%27_cyclically_symmetric_attractor)
+- [Deterministic chaos seen in terms of feedback circuits: Analysis, synthesis, 'labyrinth chaos'](https://www.worldscientific.com/doi/abs/10.1142/S0218127499001383) <span id="ref1"></span>
+- [Labyrinth Chaos](https://www.worldscientific.com/doi/abs/10.1142/S0218127407018245)

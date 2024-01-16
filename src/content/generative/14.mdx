@@ -1,0 +1,40 @@
+---
+  pubDate: 'Jan 26 2020'
+  status: 'published'
+  title: '#14 - LinesLinesLines'
+  heroImage: '/imgs/lines.jpg'
+  slug: 'lines'
+  categories: ['generative-art', 'javascript']
+  fork: [
+    {
+      title: 'Codepen',
+      url: 'https://codepen.io/TheodoreVorillas/pen/RwNdXpw'
+    }
+  ]
+  excerpt: 'Lines on Blank Canvas'
+---
+
+> De Stijl (/də ˈstaɪl/; Dutch pronunciation: [də ˈstɛil]), Dutch for "The Style", also known as Neoplasticism, was a Dutch art movement founded in 1917 in Leiden. De Stijl consisted of artists and architects.[1] In a narrower sense, the term De Stijl is used to refer to a body of work from 1917 to 1931 founded in the Netherlands.[2][3] Proponents of De Stijl advocated pure abstraction and universality by a reduction to the essentials of form and colour; they simplified visual compositions to vertical and horizontal, using only black, white and primary colors.
+
+## The algorithm
+
+```javascript title="LinesLinesLines.js"
+p.fire = () => {
+  p.clear();
+  const w = getWh();
+  const r = p.random();
+  let y;
+  for (let index = 0; index < w * 6; index++) {
+    p.beginShape();
+    p.strokeWeight(1);
+    p.stroke(`rgba(250,250,250, ${p.random()})`);
+    y = p.noise(index + (r % w)) * w;
+    p.line(index % w, 0, index % w, y);
+    p.endShape(p.CLOSE);
+  }
+};
+```
+
+## References
+
+- [Generative Logo Design](https://components.ai/notes/logo)

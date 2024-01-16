@@ -1,0 +1,7 @@
+---
+import { getArt } from "../lib/posts";
+import ArtListing from "@/components/ArtListing.astro";
+const art = await getArt();
+---
+
+<ArtListing posts={art} />

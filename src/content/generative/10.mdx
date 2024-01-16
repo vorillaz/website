@@ -1,0 +1,34 @@
+---
+  pubDate: 'May 02 2019'
+  status: 'published'
+  title: '#10 - The Hadley Attractor'
+  heroImage: '/imgs/hadley-attractor.jpg'
+  slug: 'hadley-attractor'
+  categories: ['generative-art', 'javascript']
+  fork: [{
+    title: 'Codepen',
+    url: 'https://codepen.io/TheodoreVorillas/pen/rbXGZY'
+  }]
+  excerpt: 'A Mathematical Model for Atmospheric Circulation.'
+---
+
+## The algorithm
+```javascript title="hadley-attractor.js"
+
+const a = 0.2;
+const b = 4;
+const f = 8;
+const g = 1;
+
+const next = (x,y,z) => {
+  const dx = -Math.pow(y, 2) - Math.pow(z, 2) - a * x + a * f;
+  const dy = x * y - b * x * z - y + g;
+  const dz = b * x * y + x * z - z;
+  return {dx,dy,dz};
+};
+```
+
+## References
+- [Dynamical Analysis of the Lorenz-84 Atmospheric Circulation Model](https://www.hindawi.com/journals/jam/2014/296279/)
+- [A model for atmospheric circulation](http://redshift.vif.com/JournalFiles/V19NO3PDF/V19N3LAK.pdf) <span id="ref1"></span>
+- [Dynamics of the Hadley circulation in an axisymmetric model undergoing stratification periodic forcing](https://www.nonlin-processes-geophys.net/24/167/2017/npg-24-167-2017.pdf)

@@ -1,0 +1,342 @@
+---
+  pubDate: 'Feb 27 2019'
+  status: 'published'
+  title: 'Serving Adaptive Components Using the Network Information API'
+  categories: ['javascript', 'react', 'webperf']
+  keywords: ['React', 'JavaScript', 'adaptive', 'Network Information API', 'adaptive design']
+  heroImage: '/imgs/adaptive-serving-components-using-the-network-information-api.jpg'
+  imgCredits: {
+    username: 'Nikola Johnny Mirkovic',
+    url: 'https://unsplash.com/@thejohnnyme'
+  }
+  description: 'Delivering network-aware experiences.'
+---
+
+For the past few years, we have been developing with performance in mind. Adaptive web development requires thinking about our end users, developing experiences and products for low-end devices and Internet connections without sacrificing the quality of our work.
+
+## The Network Information API
+
+The [Network information API](http://w3c.github.io/netinfo/) allows us to reconsider our design and helps us create user interfaces that feel snappy as we can detect and act against our users' connection speed. The API is in experimental mode but is already available in Chrome, with more browsers following in the near future.
+
+We can use the API using the `navigator.connection` read-only property. The nested `navigator.connection.effectiveType` property exposes the network consumed.  Alongside the `effectiveType` property, the `navigator.connection.type` exposes the physical network type of the user.
+Additional information about round-trip time metrics and effective bandwidth estimation are also exposed.
+
+The table below defines the effective connection types as shown in the specification.
+
+|ECT        | Minimum RTT (ms) | Maximum downlink (Kbps) | Explanation                                                                                              |
+|:---------:|------------------|-------------------------|----------------------------------------------------------------------------------------------------------|
+| slow-2g   | 2000             | 50                      | The network is suited for small transfers only such as text-only pages.                                  |
+| 2g        | 1400             | 70                      | The network is suited for transfers of small images.                                                     |
+| 3g        | 270              | 700                     | The network is suited for transfers of large assets such as high resolution images, audio, and SD video. |
+| 4g        | 0                | ∞                       | The network is suited for HD video, real-time video, etc.                                                |
+
+
+## Adaptive components with React / Preact.
+
+We can accelerate our performance metrics using the Network API, especially for network consuming components. For instance, let's say that we have a simple React component that renders different images, with different resolutions and sizes. The component should be network-aware and handle connection types efficiently. Also using the `navigator.onLine` property we can detect offline usage, mixing PWAs with adaptive components and offline detection, thus producing top-notch experiences for our users.
+
+Our `<Img />` component would effectively render an output that looks like this:
+- 4g: A high-resolution image (2400px)
+- 3h: A medium resolution image (1200px)
+- 2g: A low-resolution image (600px)
+- offline: A placeholder that warns the user
+
+Using React we will create a component that is network-aware. Our naive component will accept an `src` property and serve prefixed images as:
+if the `src` is equal to `my-awesome-image.jpg` the relative output could be `hq-my-awesome-image.jpg` and `md-my-awesome-image.jpg`, `lofi-my-awesome-image.jpg`.
+
+We will start by creating a simple React component that looks like this:
+
+```jsx
+import React, {Component} from 'react';
+
+export default class Img extends Component {
+  render() {
+    const {src} = this.props;
+    return (<img src={src}/>)
+  }
+}
+```
+
+Next up we will create a private method to detect network changes:
+
+```jsx
+class Img extends Component {
+  //...
+  detectNetwork = () => {
+    const {connection = null, onLine = false} = navigator;
+    if (connection === null) {
+      return 'n/a';
+    }
+    if(!onLine) {
+      return 'offline';
+    }
+    return {effectiveType = '4g'} = connection;
+  }
+  //...
+}
+```
+
+And finally we should render the output as :
+
+```jsx
+class Img extends Component {
+  //...
+  render() {
+    const {src, ...rest} = this.props;
+    const status = this.detectNetwork();
+    // The network API is not available :()
+    if (status === 'n/a') {
+      return <img src={src} {...rest}/>
+    }
+    if (status === 'offline') {
+      return <div>You are currently offline</div>
+    }
+    const prefix = status === '4g' ? 'hq' : status === '3g' ? 'md' : 'lofi';
+    return <img src={`${prefix}-${src}`} {...rest}/>
+  }
+  //...
+}
+```
+
+## Higher-Order Components
+
+A higher-order component can scale up your design system and provide a de facto solution for handling network-aware components in a more elegant way.
+
+```jsx
+const emptyComponent = () => null;
+
+const detectNetwork = () => {
+  const {connection = null, onLine = false} = navigator;
+  if (connection === null) {
+    return 'n/a';
+  }
+  if (!onLine) {
+    return 'offline';
+  }
+  return ({effectiveType = '4g'} = connection);
+};
+
+const withNetwork = (
+  components = {
+    '4g': emptyComponent,
+    '3g': emptyComponent,
+    '2g': emptyComponent,
+    offline: emptyComponent,
+    'n/a': emptyComponent
+  }
+) => props => {
+  const status = detectNetwork();
+  const NetworkAwareComponent = components[status];
+  return <NetworkAwareComponent {...props} />;
+};
+```
+
+Consuming the higher-order component is dead simple:
+
+```jsx
+import React from 'react';
+import withNetwork from './hocs//withNetwork';
+
+export default withNetwork({
+  offline: () => <div>This is offline</div>,
+  '4g': () => <div>This is 4g</div>,
+  '3g': () => <div>This is 3g</div>,
+  '2g': () => <div>This is 2g</div>,
+  'n/a': () => <div>Network API is not supported 🌐</div>,
+});
+```
+
+We can also simplify the higher order component a bit and differentiate components for `fast` and `slow` networks connections as:
+
+```jsx
+const detectNetwork = () => {
+  const {connection = null, onLine = false} = navigator;
+  if (connection === null) {
+    return 'n/a';
+  }
+  if (!onLine) {
+    return 'offline';
+  }
+  const {effectiveType = '4g'} = connection;
+  return (/\slow-2g|2g|3g/.test(effectiveType)) ? 'slow' : 'fast';
+};
+```
+
+## Dynamic loading with React
+
+Using `react-loadable` we can take this example a bit further and asynchronously load our components with dynamic imports. In this way, we can load heavy-weight chunks on demand for faster networks.
+```jsx
+import React from 'react';
+import withNetwork from './hocs/withNetwork';
+
+import Loadable from 'react-loadable';
+
+const HiQ = Loadable({
+  loader: () => import('./hiQualityImg')
+});
+
+// For slow networks we don't want to create a network overhead
+const SlowNetworkComponent = () => <div>That's slow or offline</div>;
+
+export default withNetwork({
+  offline: () => <div>This is offline</div>,
+  '4g': () => <HiQ />,
+  '3g': () => <SlowNetworkComponent />,
+  '2g': () => <SlowNetworkComponent />,
+  'n/a': () => <SlowNetworkComponent />
+});
+```
+
+## Vue components
+
+[Addy Osmani](https://addyosmani.com/blog/adaptive-serving/) has a great example using Vue and adaptive components. A sample Vue component looks like this:
+```jsx
+<template>
+  <div id="home">
+    <div v-if="connection === 'fast'">
+      <img src="./hq-image.jpg" />
+    </div>
+    <div v-if="connection === 'slow'">
+      <img src="./lofi-image.jpg" />
+    </div>
+  </div>
+</template>
+```
+
+## Vue dynamic loading
+
+Vue can handle dynamic loading elegantly using conditional imports:
+
+```javascript
+Vue.component(
+  'async-network-example',
+  // The `import` function returns a Promise.
+  () => detectNetwork() === 'fast' ? import('./hq-component') : import('./lofi-component')
+);
+```
+
+## Web components
+Finally, we can use [web components](https://developer.mozilla.org/en-US/docs/Web/Web_Components) without any additional framework to create reusable components that we can consume afterward.
+A simple approach looks like this:
+
+```javascript
+const detectNetwork = () => {
+  const { connection = null, onLine = false } = navigator;
+  if (connection === null) {
+    return "n/a";
+  }
+  if (!onLine) {
+    return "offline";
+  }
+  const { effectiveType = "4g" } = connection;
+  return /\slow-2g|2g|3g/.test(effectiveType) ? "slow" : "fast";
+};
+
+export class NetworkMedia extends HTMLElement {
+  constructor() {
+    super();
+    const shadowRoot = this.attachShadow({ mode: "open" });
+
+    const parsed = this.getAttributeNames().reduce((acc, key) => {
+      return { ...acc, [key]: this.getAttribute(key) };
+    }, {});
+    const status = detectNetwork();
+    const { hq, lofi, ...rest } = parsed;
+    const htmlAttrs = Object.assign({}, rest, {
+      src: status === "fast" ? hq : lofi
+    });
+
+    const attrs = Object.keys(htmlAttrs)
+      .map(key => `${key}=${htmlAttrs[key]}`)
+      .join(" ");
+    shadowRoot.innerHTML = `
+            <img ${attrs} />
+        `;
+  }
+}
+```
+
+We need to declare the web component and finally use it.
+
+```jsx
+import { NetworkMedia } from "./network-media.js";
+
+customElements.define("network-media", NetworkMedia);
+const ref = document.getElementById("ref");
+```
+
+```html
+<p>Lorem ipsum</p>
+<network-media
+      hq="https://dummyimage.com/600x400/000/fff&text=fast"
+      lofi="https://dummyimage.com/600x400/000/fff&text=slow"
+    ></network-media>
+```
+
+## HTM (Hyperscript Tagged Markup)
+
+[HTM](https://www.npmjs.com/package/htm)  is a wonderful tiny library developed by Jason Miller, which allows creating reusable modules with a JSX-like syntax.
+
+```html
+<script type="module">
+      import {
+        html,
+        Component,
+        render
+      } from "https://unpkg.com/htm/preact/standalone.mjs";
+      const detectNetwork = () => {
+        const { connection = null, onLine = false } = navigator;
+        if (connection === null) {
+          return "n/a";
+        }
+        if (!onLine) {
+          return "offline";
+        }
+        const { effectiveType = "4g" } = connection;
+        return /\slow-2g|2g|3g/.test(effectiveType) ? "slow" : "fast";
+      };
+      class Media extends Component {
+        render({ hq, lofi }) {
+          const status = detectNetwork();
+          return html`
+            <img src="${status === "fast" ? hq : lofi}" />
+          `;
+        }
+      }
+
+      render(html`<${Media} hq="./hq.jpg" lofi="./lofi.jpg" />`, document.body);
+    </script>
+```
+
+## Vanilla JavaScript
+
+We can additionally create utility helpers for network and status detection and progressively enhance the delivered user experience. We can show warnings if the user goes offline, fetch different resources per network speed or even serve different bundles for low-end networks.
+```javascript
+const detectNetwork = () => {
+  const {
+    effectiveType
+  } = navigator.connection
+  console.log(`Network: ${effectiveType}`)
+}
+
+
+if (navigator.connection) {
+  navigator.connection.addEventListener('change', detectNetwork)
+}
+
+if (navigator.onLine) {
+  window.addEventListener('offline', (e) => {
+    console.log('Status: Offline');
+  });
+  window.addEventListener('online', (e) => {
+    console.log('online');
+  });
+}
+```
+
+## Further reading
+
+- [Adaptive Serving using JavaScript and the Network Information API](https://addyosmani.com/blog/adaptive-serving/)
+- [https://deanhume.com/dynamic-resources-using-the-network-information-api-and-service-workers/](https://deanhume.com/dynamic-resources-using-the-network-information-api-and-service-workers/)
+- [Connection-Aware Components](https://mxb.at/blog/connection-aware-components/)
+

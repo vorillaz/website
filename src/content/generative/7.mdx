@@ -1,0 +1,35 @@
+---
+  pubDate: '2019-04-14'
+  status: 'published'
+  title: '#7 - The Lorenz Mod 2 Attractor'
+  heroImage: '/imgs/lorenz-mod-2-attractor.jpg'
+  slug: 'lorenz-mod-2-attractor'
+  categories: ['generative-art', 'javascript']
+  fork: [{
+    title: 'Codepen',
+    url: 'https://codepen.io/TheodoreVorillas/pen/LvzEmb'
+  }]
+  excerpt: 'The Lorenz Attractor, a Paradigm for Chaos.'
+---
+
+The Lorenz system is a system of ordinary differential equations first studied by Edward Lorenz. It is notable for having chaotic solutions for certain parameter values and initial conditions. In particular, the Lorenz attractor is a set of chaotic solutions of the Lorenz system which, when plotted, resemble a butterfly or figure eight. [#1](#ref1)
+
+## The algorithm
+
+```javascript title="lorenz-mod-2.js"
+const a = 0.9;
+const b = 5.0;
+const c = 9.9;
+const d = 1.0;
+
+const next = (x,y,z) => {
+  const dx = -a * x + y * y - z * z + a * c;
+  const dy = x * (y - b * z) + d;
+  const dz = -z + x * (b * y + z);
+  return {dx,dy,dz};
+};
+```
+
+## References
+- [Lorenz system](https://en.wikipedia.org/wiki/Lorenz_system) <span id="ref1"></span>
+- [The Lorenz Attractor, a Paradigm for Chaos](http://perso.ens-lyon.fr/ghys/articles/lorenzparadigm-english.pdf)

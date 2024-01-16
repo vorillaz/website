@@ -1,0 +1,35 @@
+---
+  pubDate: 'May 04 2019'
+  status: 'published'
+  title: '#11 - The Halvorsen Attractor'
+  heroImage: '/imgs/halvorsen-attractor.jpg'
+  slug: 'halvorsen-attractor'
+  categories: ['generative-art', 'javascript']
+  fork: [{
+    title: 'Codepen',
+    url: 'https://codepen.io/TheodoreVorillas/pen/LoPqzO'
+  }]
+  excerpt: 'Deterministic Chaos.'
+---
+
+The Halvorsen's cyclically symmetric attractor can produce interesting artistic results using a single entry parameter.
+
+For this visualization, I have decided to use a different coloring palette, as well as creating a projection effect using a diffused particle system.
+## The algorithm
+```javascript title="halvorsen-attractor.js"
+
+const a = 1.4;
+
+const next = (x,y,z) => {
+  const dx = -a * x - 4 * y - 4 * z - y * y;
+  const dy = -a * y - 4 * z - 4 * x - z * z;
+  const dz = -a * z - 4 * x - 4 * y - x * x;
+  return {dx,dy,dz};
+};
+```
+
+## References
+- [Elegant Chaos: Algebraically Simple Chaotic Flows](https://www.researchgate.net/publication/268721148_Elegant_chaos_Algebraically_simple_chaotic_flows_Dedicated_to_the_memory_of_Edward_Norton_Lorenz)
+- [Advances in Chaos Theory and Intelligent Control](http://www.gbv.de/dms/tib-ub-hannover/866444076.pdf)
+- [Novel quantification for chaotic dynamical systems with large state attractors](http://www.wseas.us/e-library/conferences/2011/Angers/ACMMA/ACMMA-17.pdf)
+- [Deterministic Chaos](http://dataanalysis.vsb.cz/data/Vyuka/NAVY/Deterministic%20Chaos.pdf)

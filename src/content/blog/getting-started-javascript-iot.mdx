@@ -1,0 +1,85 @@
+---
+  pubDate: 'Feb 2 2019'
+  status: 'published'
+  title: 'Getting Started with JavaScript and IoT'
+  categories: ['iot', 'javascript', 'node-js']
+  keywords: ['iot', 'internet of things', 'JavaScript', 'arduino', 'breadboard', 'johhny-five', 'hardware']
+  heroImage: '/imgs/getting-started-javascript-iot.jpg'
+  imgCredits: {
+    username: 'Felipe Faria',
+    url: 'https://unsplash.com/@felipefsf'
+  }
+  description: 'Using Johnny-Five and Arduino Uno'
+---
+
+import { Image } from 'astro:assets';
+
+For the past few years, the Internet of Things ecosystem has been blooming. We are facing a new era for web and mobile development since we can create totally new experiences, interfaces or products using microcontrollers, 3D printers, dronesand smart devices.
+
+Cheap, widely accessible and open source hardware and development boards like the Arduino Uno are getting lots of attention since it’s pretty easy to start prototyping and tinkering with them.
+
+
+
+## JavaScript and IoT
+
+If you are interested in the IoT world and you are working on the web you may found yourself struggling to get started with embedded development. Usually, you have to be familiar with C/C++ in order to control boards from the Arduino family. Luckily though you can use JavaScript along with the Arduino Uno right away using Johnny-Five.
+
+## Johnny-Five
+Johnny-Five is a JavaScript robotics & IoT platform originally developed by Bocoup. It allows us to use JavaScript to control microcontrollers either by compiling JavaScipt to native bytecode or by using a host machine externally controlling the target device over WiFi or via serial USB communication. It supports 40 different boards and has a powerful API for external modules and additional hardware components.
+
+## Using Johnny-Five with the Arduino Uno
+
+Johnny-Five communicates with the Arduino from a host machine using the Firmdata protocol. We can use a serial USB cable to connect the host machine directly to the Arduino. It's important to note that Johnny-Five can actually work with different Arduino boards I have chosen to go down with the Arduino Uno since it's one of the most popular boards, widely available and supported by a vivid community.
+
+
+## Hardware components
+
+For the purpose of this tutorial, we are going to try blinking a LED light, the "Hello world" example of IoT. You are going to need a few components:
+
+- an Arduino Uno or Genuino Uno Board
+- a breadboard
+- a few jumper wires
+- some LEDs
+- some 220ohm resistors
+
+## Setup the Arduino IDE
+The Arduino IDE is required in order to connect the device to the host. You can download and install the Arduino IDE from [here](https://www.arduino.cc/en/main/software).  Connect the Arduino board to your host machine using a serial USB cable. Open On Arduino IDE, go to *Tools > Port* and make sure the right board, Arduino Uno, is connected to the right port (tty.usbmodem.* for Mac or Linux, cu.usbmodem* for Windows).
+Now we need to install the Firmadata protocol in order to control the board.
+- On IDE, open **File > Examples > Firmata > StandardFirmata**.
+- Click the upload/arrow button.
+- Wait until the IDE message window says **"Done uploading"**.
+
+## Wiring
+The board has a set of general input and output pins used for connecting external modules. Each pin is labeled with a number so you can easily identify which ones are in use. There are also two 5V output pins and two pins labeled as GND, which we can use in order to power our prototype directly from the board. The wiring looks like this:
+
+<Image src='/imgs/svgs/arduino-led-wiring.svg' 
+title="Arduino Uno LED wiring"
+alt="Wiring diagram" width="938" height="723"/>
+
+Using the jumper wires we connected the *13th* pin with the LED anode (the longer pin of the LED) and the ground pin with the resistor that is also connected with LED. LEDs are power efficient and require a low current, thus we can power a few of them directly from the board without any external power supply.
+
+
+
+## Blinking an LED with Johnny-Five
+Now let's move to the coding part. Install the Johnny-Five module and create the entry point as `npm i --save johnny-five && touch led.js`.
+In the led.js file add the following snippet using your favorite code editor
+
+```javascript title="/projects/blink.js"
+const jfive = require('johnny-five');
+const board = new jfive.Board();
+
+board.on('ready', function () {
+  // Use the Led class for the 13th pin
+  const led = new jfive.Led(13);
+  // Blink the LED every half a second
+  led.blink(500);
+});
+```
+Run the script using `node blink.js`. The LED should start blinking. Congratulations, you've started your journey into the IoT world!
+
+
+## Acknowledgements
+This example is used in order to demonstrate a naïve example for newcomers into embedded development. Johnny-Five is a lovely framework to work with. There are also other solutions out there like the [Cylon](https://cylonjs.com "Cylon IoT library") library.
+
+Also, as I have mentioned before, using Johnny-Five with the Arduino Uno is a bit vague, we are actually using controlling the board remotely. Still, you only have to spend a tiny amount of money to get started developing and prototyping.
+In the upcoming tutorials, I'll try to cover development for different boards like the Raspberry Pi Zero or the Espruino that allows us to actually control hardware in a more resilient and fun way.

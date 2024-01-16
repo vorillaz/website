@@ -1,0 +1,208 @@
+---
+  pubDate: 'Mar 22 2019'
+  status: 'published'
+  title: 'How to Detect Idle Browser Tabs with JavaScript'
+  heroImage: '/imgs/detect-idle-browser-tabs-with-javascript.jpg'
+  imgCredits: {
+    username: 'Marcin Jozwiak',
+    url: 'https://unsplash.com/@marcinjozwiak'
+  }
+  categories: ['javascript', 'webperf']
+  description: 'Using the Page Visibility API.'
+---
+
+In some cases, we can found ourselves doing lots of intensive, CPU hungry tasks while the users are interacting with our end products or applications.
+Firing pollers, establishing WebSocket connections or even loading media like videos or images could become performance dreadlocks especially if these tasks are consuming resources while there is no need to. It's a really good and meaningful practice to release the main thread from unnecessary workloads or network requests while the users are not actively interacting with the interface. In another manner, in an industry where most hosting providers are introducing quota-based pricing models reducing the network request could also reduce the costs for running your application or services.
+
+## The Page Visibility API
+
+All the modern web browsers have incorporated the Page Visibility API which allows us to detect when a browser tab is hidden, moreover, we can also register an event listener in order to detect signals upon visibility changing.
+
+## document.visibilityState
+
+The `document.visibilityState` could either be `visible` while the page is in a foreground
+tab of a non-minimized window or `hidden` while the page is not actually visible to the user.
+
+We can directly access the `document.visibilityState` as:
+
+```javascript title="/projects/visibility-log.js"
+console.log(document.visibilityState);
+// => It could be `visible` or `hidden`
+```
+
+## visibilitychange Event
+
+We also can easily detect changes in the visibility property using an event listener.
+
+```javascript title="/projects/visibility-interact.js"
+const onVisibilityChange = () => {
+  if (document.visibilityState === 'hidden') {
+    console.log('> The window is hidden.');
+  } else {
+    console.log('> The window is visible.');
+  }
+};
+document.addEventListener('visibilitychange', onVisibilityChange, false);
+```
+
+## An Example with Polling
+
+Consider a scenario where we are polling our API for updates and we want to avoid making unnecessary calls for idle users. A simplified example would look like this:
+
+```javascript title="/projects/visibility-polling.js"
+const poll = () => {
+  const interval = 1500;
+  let _poller = null;
+  const repeat = () => {
+    console.log(`~ Polling: ${Date.now()}.`);
+  };
+
+  return {
+    start: () => {
+      _poller = setInterval(repeat, interval);
+    },
+    stop: () => {
+      console.log('~ Poller stopped.');
+      clearInterval(_poller);
+    }
+  };
+};
+
+const poller = poll();
+poller.start();
+
+const onVisibilityChange = () => {
+  if (document.visibilityState === 'hidden') {
+    poller.stop();
+  } else {
+    poller.start();
+  }
+};
+
+document.addEventListener('visibilitychange', onVisibilityChange, false);
+```
+
+## Asynchronously Loading in the Background
+
+But sometimes we can accelerate our users' end experience by following the other way around. Instead of canceling all jobs and requests we can asynchronously load external dependencies or assets. In that way, users' end experience would be more "contentful" and rich when they come back.
+
+### Webpack
+
+Using ES2015 dynamic imports proposal along with the appropriate Webpack configuration manifest we can easily load additional modules or assets in the background
+
+```javascript title="/projects/visibility-wbpck.js"
+let loaded = false;
+const onVisibilityChange = () => {
+  if (document.visibilityState === 'hidden') {
+    // Aggresively preload external assets ans scripts
+    if (loaded) {
+      return;
+    }
+    Promise.all([
+      import('./async.js'),
+      import('./another-async.js'),
+      import(/* webpackChunkName: "bar-module" */ 'modules/bar'),
+      import(/* webpackPrefetch: 0 */ 'assets/images/foo.jpg')
+    ]).then(() => {
+      loaded = true;
+    });
+  }
+};
+
+document.addEventListener('visibilitychange', onVisibilityChange, false);
+```
+
+### Rollup
+
+Rollup does also support dynamic import out of the box.
+
+```javascript title="/projects/visibility-rollup.js"
+let loaded = false;
+const onVisibilityChange = () => {
+  if (document.visibilityState === 'hidden') {
+    // Aggresively preload external assets ans scripts
+    if (loaded) {
+      return;
+    }
+    Promise.all([
+      import('./modules.js').then(({default: DefaultExport, NamedExport}) => {
+        // do something with modules.
+      })
+    ]).then(() => {
+      loaded = true;
+    });
+  }
+};
+
+document.addEventListener('visibilitychange', onVisibilityChange, false);
+```
+
+### Preload with Javascript
+
+Besides using a bundler we can also preload static assets like images using just a few lines of JavaScript.
+
+```javascript title="/projects/visibility-js-img-preload.js"
+let loaded = false;
+
+const preloadImgs = (...imgs) => {
+  const images = [];
+  imgs.map(
+    url =>
+      new Promise((resolve, reject) => {
+        images[i] = new Image();
+        images[i].src = url;
+        img.onload = () => resolve();
+        img.onerror = () => reject();
+      })
+  );
+};
+
+const onVisibilityChange = () => {
+  if (document.visibilityState === 'hidden') {
+    // Aggresively preload external assets ans scripts
+    if (loaded) {
+      return;
+    }
+    Promise.all(
+      preloadImgs(
+        'https://example.com/foo.jpg',
+        'https://example.com/qux.jpg',
+        'https://example.com/bar.jpg'
+      )
+    )
+      .then(() => {
+        loaded = true;
+      })
+      .catch(() => {
+        console.log('> Snap.');
+      });
+  }
+};
+
+document.addEventListener('visibilitychange', onVisibilityChange, false);
+```
+
+## Micro-interactions
+
+Finally, a neat approach for grabbing users' attention is dynamically changing the favicon, using just a few pixels you can retain interaction.
+
+```javascript title="/projects/visibility-favicon.js"
+const onVisibilityChange = () => {
+  const favicon = document.querySelector('[rel="shortcut icon"]');
+  if (document.visibilityState === 'hidden') {
+    favicon.href = '/come-back.png';
+  } else {
+    favicon.href = '/example.png';
+  }
+};
+
+document.addEventListener('visibilitychange', onVisibilityChange, false);
+```
+
+## References
+
+- [Page Visibility in W3C](https://www.w3.org/TR/page-visibility)
+- [Document.visibilityState in MDN](https://developer.mozilla.org/en-US/docs/Web/API/Document/visibilityState)
+- [Document API: visibilityState browser support](https://caniuse.com/#search=visibilityState)
+- [ES2015 dynamic imports with Webpack](https://webpack.js.org/api/module-methods/#import-) 
+- [Dynamic imports with Rollup](https://rollupjs.org/guide/en/#dynamic-import)

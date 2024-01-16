@@ -1,0 +1,48 @@
+---
+export interface Props {
+  currentPage: number;
+  totalPages: number;
+  prevUrl: string;
+  nextUrl: string;
+}
+
+const { currentPage, totalPages, prevUrl, nextUrl } = Astro.props;
+
+const prev = currentPage > 1 ? "" : "disabled";
+const next = currentPage < totalPages ? "" : "disabled";
+---
+
+<div class="mt-8 flex justify-center">
+  {
+    totalPages > 1 && (
+      <nav class="pagination-wrapper mt-8" aria-label="Pagination">
+        {
+          <a
+            aria-disabled={prev === "disabled"}
+            href={prevUrl}
+            class={`mr-4 select-none ${prev}`}
+            aria-label="Previous"
+          >
+            Prev
+          </a>
+        }
+        {currentPage} / {totalPages}
+        <a
+          aria-disabled={next === "disabled"}
+          href={nextUrl}
+          class={`ml-4 select-none ${next}`}
+          aria-label="Next"
+        >
+          Next
+        </a>
+      </nav>
+    )
+  }
+</div>
+
+<style>
+  [aria-disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+</style>

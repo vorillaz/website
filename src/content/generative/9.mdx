@@ -1,0 +1,38 @@
+---
+  pubDate: '2019-05-01'
+  status: 'published'
+  title: '#9 - The Chen–Lee Attractor'
+  heroImage: '/imgs/chen-lee-attractor.jpg'
+  slug: 'chen-lee-attractor'
+  categories: ['generative-art', 'javascript']
+  fork: [{
+    title: 'Codepen',
+    url: 'https://codepen.io/TheodoreVorillas/pen/LvKWXe'
+  }]
+  excerpt: 'Generation of hyperchaos.'
+---
+
+The chaotic Chen–Lee system was developed with a formalism based on the Euler equations for the motion of a rigid body. It was proved that this system is the governing set of equations for gyro motion with feedback control. Recently, studies were conducted to explore the dynamic behavior of this system, including fractional order behavior, the generation of hyperchaos and perturbation analysis, control and anti-control of chaos, synchronization, etc.[#1](#ref1)
+
+
+## The algorithm
+
+```javascript title="chen-lee.js"
+
+const alpha = 5;
+const beta = -10;
+const delta = -0.38;
+
+const next = (x,y,z) => {
+  const dx = alpha * x - y * z;
+  const dy = beta * y + x * z;
+  const dz = delta * z + (x * y) / 3;
+  return {dx,dy,dz};
+};
+```
+
+## References
+- [Alternative implementation of the chaotic Chen–Lee system](https://www.sciencedirect.com/science/article/pii/S0960077908003524) <span id="ref1"></span>
+- [Parametric study of the fractional-order Chen–Lee system](https://www.sciencedirect.com/science/article/pii/S0960077906009295)
+- [Controlling chaos and chaotification in the Chen–Lee system by multiple time delays](https://www.sciencedirect.com/science/article/pii/S0960077906010277)
+- [Chaos Control and Projective Synchronization of a Chaotic Chen-Lee System](https://www.ps-taiwan.org/cjp/download.php?type=paper&vol=47&num=3&page=261)

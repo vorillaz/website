@@ -1,0 +1,62 @@
+---
+  pubDate: 'Jul 16 2019'
+  status: 'published'
+  title: 'Getting Started with Espruino and ESP8266'
+  categories: ['iot', 'javascript']
+  keywords: ['iot', 'internet of things', 'JavaScript', 'espruino', 'breadboard', 'ESP8266','hardware']
+  heroImage: '/imgs/getting-started-espruino-esp8266.jpg'
+  imgCredits: {
+    username: 'Tim Käbel',
+    url: 'https://unsplash.com/@dokawastaken'
+  }
+  description: 'Programming microcontrollers with JavaScript'
+---
+
+import { Image } from 'astro:assets';
+
+
+I have written a series of [posts](https://www.vorillaz.com/iot/) about using JavaScript for embedded development using Johnny-Five.
+
+While it is a great library for programming using Arduino or other popular microcontrollers, it lacks one basic feature, portability.
+For the majority of the supported platforms, JavaScript is executed on a host machine that runs Node.js. Johnny-Five transmits basic I/O instructions to the connected board via a USB serial, which acts as a thin client. Basically, we can just control the board by executing commands, thus creating a standalone prototype is not possible.
+
+## Say Hello to Espruino
+Espruino is a firmware with a JavaScript interpreter integrated right into it. It was founded and developed by Gordon Williams, while it’s coming with an IDE as a Chrome extension, a vivid community and lots of tutorials and examples. Espruino is more like an interpreter, which means we can use JavaScript which gets compiled and executed on the target board.
+
+## ESP8266 and Espruino
+In the Espruino e-shop, there are a few boards available for just a couple of British pounds. But you can also use any of the other options available. You can get up and running using Espruino with the ESP boards. ESP8266 is a great option, as it's affordable, expandable and there are lots of examples, tutorials, and projects built with it.
+
+## Flashing Espruino
+For the purpose of this simple tutorial we are going to use the NodeMcu ESP8266 Lua board, which comes with a micro USB port for power, programming and debugging as well as a bunch of soldered pin headers for quick prototyping. Flashing Espruino is a lengthy process and may get quite tricky, especially for newcomers to embedded development. Luckily though we can use Flasher.js, a command-line tool that allows flashing Espruino without any hassle. You can run Flasher.js on Linux, Mac or Windows and there is also support for a bunch of other boards besides NodeMcu.
+
+## Download and Install Flasher.js
+You can find a binary for your operating system in the Flasher.js [releases page](https://www.espruino.com/Download) which you can download and install. ou may need to download and install some additional drivers in order to allow Flasher.js to communicate with your device. There is also a list with the required drivers per device and operating system available in the documentation [page](https://guides.thingssdk.com/flasher.js/compatible_devices.html).
+
+<Image src="/imgs/flasher-js-flashing.jpg" title="Flashing Espruino with Flasher.js" alt="Flasher.js usage" 
+width="661"
+height="382"
+caption="Flashing Espruino with Flasher.js"/>
+
+
+
+
+## Flash Your Device
+Open Flasher.js app and connect your device to your development machine. For the NodeMcu ESP8266 Lua board you need to use a USB to Micro USB cable. Flasher will try to auto detect the available port. On Windows, these are going to look like `COM3`, while on Mac and Linux they will be more like `/dev/ttyUSB1` or `/dev/cu.usbmodem150`. Double-check that the port is the appropriate one, pick the latest Espruino binary and hit the Flash button.
+
+While it's flashing, you should see your onboard LED blinking. When the process is done you can immediately start using your device with Espruino.
+
+
+
+
+## Setup the Espruino IDE
+Head over to the Espruino Web IDE (page)[https://www.espruino.com/Web+IDE] and install the Chrome extension application. Connect your device and launch the app. Click the "Connect" button on the upper left corner and pick the appropriate port. You are directly connected to your board. You can verify your board, as well as the Espruino build using the Web IDE's console like this:
+```bash
+print(JSON.stringify(process.env));
+```
+
+## Conclusion
+Using Espruino for embedded development can open a whole new world for web developers. ESP8266 has been around for a while and you can start prototyping right away. In a series of upcoming tutorials, I am going to show you how you can use Espruino in order to create lots of interesting experiments and projects.
+
+## Further resources
+- [Install Espruino on an ESP8266 Dev Board](https://www.youtube.com/watch?v=j9xwgeE9u8E)
+- [Espruino IDE docs](https://www.espruino.com/Quick+Start+Code)

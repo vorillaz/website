@@ -1,0 +1,38 @@
+---
+  pubDate: 'Dec 24 2019'
+  status: 'published'
+  title: '#12 - Perlin Noise Wave'
+  heroImage: '/imgs/perlin-noise-wave.jpg'
+  slug: 'perlin-noise-wave'
+  categories: ['generative-art', 'javascript']
+  fork: [{
+    title: 'Codepen',
+    url: 'https://codepen.io/TheodoreVorillas/pen/MWYoaMK'
+  }]
+  excerpt: 'Using Perlin Noise to Generate a Wave-Like Pattern.'
+---
+
+Perlin noise is a type of gradient noise developed by Ken Perlin in 1983 as a result of his frustration with the "machine-like" look of computer-generated imagery (CGI) at the time.
+He formally described his findings in a SIGGRAPH paper in 1985 called An image Synthesizer. In 1997, Perlin was awarded an Academy Award for Technical Achievement for creating the algorithm.
+
+## The algorithm
+```javascript title="p5-perlin-noise.js"
+
+p.stroke(`rgba(0,0,0,0.4)`);
+p.strokeWeight(1);
+p.beginShape();
+
+let xOffset = 0.0;
+let step = 10;
+for (let x = constraints[0]; x < constraints[1] + step / 2; x += step) {
+  let y = p.map(p.noise(xOffset, yOffset), 0, 1, constraints[0], constraints[1]);
+  p.vertex(x, y);
+  xOffset += 0.03;
+}
+yOffset += 0.01;
+p.endShape();
+```
+
+## References
+- [Noise.js](https://github.com/josephg/noisejs)
+- [Perlin noise](https://en.wikipedia.org/wiki/Perlin_noise)

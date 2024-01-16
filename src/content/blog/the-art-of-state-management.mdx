@@ -1,0 +1,354 @@
+---
+  pubDate: 'Mar 26 2020'
+  title: 'The Art of State Management in React.'
+  status: 'published'
+  heroImage: '/imgs/the-art-of-state-management.jpg'
+  keywords: ['JavaScript', 'React', 'performance']
+  categories: ['javascript', 'react', 'webperf']
+  imgCredits: {
+    username: 'William Daigneault',
+    url: 'https://unsplash.com/@williamdaigneault'
+  }
+  description: 'Performant, scalable, testable and resilient state management using the Context API.'
+---
+
+For the past few years, I can brag (or curse) that I have used in production all the suggested state management solutions suggested by the React community: Flux, Redux, plain state management through props drilling, the Context API and so on.
+
+Creating a scalable and performant state management architecture, especially for applications with humongous stores can get quite tricky and in this tutorial, I will guide you step by step, through the journey of using React Context along with hooks effectively. For the purpose of this tutorial, we are going to create a naive Todo application that can be found in [CodeSandbox](https://codesandbox.io/s/react-perfect-state-management-f5h1q) and [GitHub](https://github.com/vorillaz/react-perfect-state-management).
+
+## Before We Begin.
+
+Since we want to ensure that our application is as performant as possible and scalable as possible we need to enforce a few key points:
+
+- **Avoid black magic**: We shall keep controlling how our state changes without side-effects.
+- **Keep everything inside the Component's lifecycle**: Components are responsible for consuming and updating the state within their lifecycle.
+- **Avoid rerendering**: Components are rendering while their properties change, to prevent performance bottlenecks components should only change upon changing the slice of the state they are consuming.
+- **Avoid boilerplate**: Code reusability is also essential, we shall be able to create new components and wire everything up with ease.
+
+## Selectors.
+
+Selectors are pure functions that can compute derived data. This concept is heavily inspired by Reselect, a library commonly used along with Redux. Selectors can get chained and manipulate or retrieve parts of the state.
+
+In a really simple example where our state stores a list of todo tasks we can use selectors to apply changes on the state.
+
+```javascript title="selectors-demo.js"
+const state = ['todo1', 'todo2'];
+
+const getTodos = todos => todos;
+const getFirstTodo = todos => todos[0];
+const addTodo = todo => todos => [...todos, todo];
+
+getFirstTodo(getTodos(state)); // => 'todo1'
+addTodo('todo3')(getTodos(state)); // => ["todo1", "todo2", "todo3"]
+```
+
+Since passing the entire state across each step of the chain can get unreadable we can rewrite the example above using a wrapper function to compose our selectors.
+
+```javascript title="compose.js"
+const noop = _ => _;
+
+const composeSelectors = (...fns) => (state = {}) =>
+  fns.reduce((prev, curr = noop) => {
+    return curr(prev);
+  }, state);
+
+composeSelectors(getTodos, getFirstTodo)(state); // => 'todo1'
+
+composeSelectors(getTodos, addTodo('todo3'))(state); // => ["todo1", "todo2", "todo3"]
+```
+
+More information and utility functions that they can be used with selectors can be found in libraries like Ramda, lodash/fp, and Reselect. It is also obvious that we can unit test each selector with ease and confidence and we call also compose new selectors with reusable tiny functional pieces of code without coupling our business logic with the shape of our state.
+
+## Selectors and React Hooks.
+
+Selectors are commonly used with React hooks, either as performance enhancers or as part of a framework, for instance, the `react-redux` package has a hook called `useSelector` which can be used in order to retrieve slices of the delivered state of the app.
+
+It's important to highlight that since Hooks can affect the component's rendering lifecycle we need to apply some kind of caching, also known as memoization. React has some builtin hooks in place like `useMemo` and `useCallback` which can help us reduce the cost changing the shape of our state. In other words, we are going to create a caching mechanism that will force the component to rerender only when the slice of the state is consuming changes.
+
+## Context Selectors.
+
+We briefly discussed how selectors are used with Redux, but what about using selectors along with the Context API?
+There is an RFC in place which implements the same idea with the Context API and there is also an NPM package called `use-context-selector` which we are going to use. The great deal about these solutions is that they are not using any external libraries, thus both of them are extremely lightweight and eventually they will not dramatically affect our bundle size.
+
+## The Provider
+
+To get started we need to install the `use-context-selector` by running:
+
+```bash
+npm install use-context-selector
+# or
+yarn add use-context-selector
+```
+
+Now we need to shape our Provider. Since we are building a Todo application we will also create add a few items into the inventory.
+
+In a file called `context.js`, we are going to create a Context object with a default value.
+
+```javascript title="context.js"
+import {createContext} from 'use-context-selector';
+export default createContext(null);
+```
+
+Keep in mind that the `defaultValue` argument is only used when a component does not have a matching Provider above it in the tree.
+
+Next up we are going to create our `TodoProvider`. Every Context object comes with a Provider React component that allows consuming components to subscribe to context changes. Inside a file called `provider.js`, we will create the Provider component.
+
+```javascript title="provider.js"
+import React, {useState, useCallback} from 'react';
+import TodosContext from './context';
+
+const TodoProvider = ({children}) => {
+  const [state, setState] = useState(['todo1', 'todo2']);
+  const update = useCallback(setState, []);
+  return <TodosContext.Provider value={[state, update]}>{children}</TodosContext.Provider>;
+};
+export default TodoProvider;
+```
+
+In the code above we have created and exposed a new React component THAT consumes the `useState` hook to properly store our Todo list. We also imported the `TodosContext` and wrapped the output rendering with the `TodosContext.Provider` component where we are also passing through the stateful value and the state updater as the `value` property. Keep in mind that we are using the `value` with an array as this is the only way to pass a value deep into the component tree without explicitly wiring it through every component. As an extra performance-enhancing technique, the state updater is also wrapped with `useCallback` in to memoize the footprint of the function.
+
+## The Main Application.
+
+Next up we need to wrap our application with the `TodosProvider`, it's a good practice to add the Providers as higher as possible into the component's rendering tree. Also, we will add a `TodoList` component to render our todo items into a list.
+
+```javascript title="app.js"
+import React from 'react';
+import TodosProvider from './provider';
+import TodoList from './list';
+
+export default function App() {
+  return (
+    <TodosProvider>
+      <TodoList />
+    </TodosProvider>
+  );
+}
+```
+
+## The Todo List Component.
+
+Our main component is really simple, it renders a bullet list with the todo items and also adds new items through a button.
+
+```javascript title="todoList.js"
+import React, {useCallback} from 'react';
+
+export default () => {
+  const todos = ['todo'];
+  const add = useCallback(e => {
+    e.preventDefault();
+  }, []);
+  return (
+    <div>
+      <ul>
+        {todos.map(todo => (
+          <li>{todo}</li>
+        ))}
+      </ul>
+      <button onClick={add}>Add</button>
+    </div>
+  );
+};
+```
+
+The `todos` list is static but we can access our internal state for the actual items. We need to import the Context object and expose the using the `useContextSelector` hook from the `use-context-selector` package.
+
+```javascript
+import Ctx from './context';
+import {useContextSelector} from 'use-context-selector';
+const todos = useContextSelector(Ctx, ([todos, update]) => todos);
+```
+
+As we have discussed before the `TodosProvider` has a `value` property holding the actual state reference and the state updater, thus we can retrieve and return the first item of the passed through property. In the same manner, we can also create the callback for our button which adds new items to the list.
+
+```javascript
+const update = useContextSelector(Ctx, ([state, update]) => update);
+const append = todo => update(state => [...state, todo]);
+
+const add = useCallback(e => {
+  e.preventDefault();
+  append('New item');
+}, []);
+```
+
+
+## Attaching the Selectors.
+
+Up until now, we have used plain anonymous functions as selectors, we can use the `composeSelectors` helper we have made a few steps above and expose the powerful advantages of composition.
+
+```javascript title="selectors.js"
+const getState = ([state, update]) => state;
+const getUpdate = ([state, update]) => update;
+
+const todos = useContextSelector(Ctx, composeSelectors(getState));
+const update = useContextSelector(Ctx, composeSelectors(getUpdate));
+```
+
+## Enhancing the usecontextselector Hook.
+
+We can add an extra performance boost by implementing a wrapper around the original `useContextSelector` hook.
+
+```javascript title="useContextSelector.js"
+import {useRef} from 'react';
+import identity from 'lodash/identity';
+import isEqual from 'lodash/isEqual';
+import {useContextSelector} from 'use-context-selector';
+
+export default (Context, select = identity) => {
+  const prevRef = useRef();
+  return useContextSelector(Context, state => {
+    const selected = select(state);
+    if (!isEqual(prevRef.current, selected)) prevRef.current = selected;
+    return prevRef.current;
+  });
+};
+```
+
+That piece of code might look a bit scary but the idea behind it is fairly simple. `useRef` returns a mutable ref object whose `.current` property is initialized to the passed argument. Using the `isEqual` we can check for state updates force updating the memoized composed selector, the same technique has been documented in the React docs for performance optimization when overriding the lifecycle function `shouldComponentUpdate` .
+
+Finally, we can also add an extra memoization layer for our selectors using the `useCallback` hook, in that way each memoized selector works as Hook, the underlying selectors can be used in order to create more hooks.
+
+Our updated `TodosList` component would look like this.
+
+```javascript title="todoList.js"
+import React, {useCallback} from 'react';
+import useContextSelector from './useContextSelector';
+import Ctx from './context';
+import composeSelectors from './compose';
+
+const getState = ([state]) => state;
+const getUpdate = ([state, update]) => update;
+
+const useWithTodos = (Context = Ctx) => {
+  const todosSelector = useCallback(composeSelectors(getState), []);
+  return useContextSelector(Context, todosSelector);
+};
+
+const useWithAddTodo = (Context = Ctx) => {
+  const addTodoSelector = useCallback(composeSelectors(getUpdate), []);
+  const update = useContextSelector(Context, addTodoSelector);
+  return todo => update(todos => [...todos, todo]);
+};
+
+export default () => {
+  const todos = useWithTodos(Ctx);
+  const update = useWithAddTodo(Ctx);
+  const add = useCallback(
+    e => {
+      e.preventDefault();
+      update('New todo');
+    },
+    [update]
+  );
+  return (
+    <div>
+      <ul>
+        {todos.map(todo => (
+          <li>{todo}</li>
+        ))}
+      </ul>
+      <button onClick={add}>Add</button>
+    </div>
+  );
+};
+```
+
+Each selector works as a hook, thus we can use them within the main component's body, internally each selector also gets memoized with `useCallback` , as we can see in the `useWithAddTodo` we can return a callback function and pass extra arguments through the composition of the final selector.
+
+## Testing.
+
+Testing can be a breeze, especially since both our selectors and our tailor-made hooks are functional. We can independently and extensively test the hooks using the `@testing-library/react-hooks` package. As you may have noticed the Context object gets passed through the hook selector as an argument, using this method we can isolate and test out each exposed selector.
+
+```javascript title="selectors.test.js"
+import {renderHook} from '@testing-library/react-hooks';
+import {createContext} from 'use-context-selector';
+import {useWithTodos} from './todos';
+
+const initialstate = ['todo1', 'todo2'];
+
+it('useWithTodos', () => {
+  const Ctx = createContext([initialstate]);
+  const {result} = renderHook(() => useWithTodos(Ctx));
+  expect(result.current).toMatchSnapshot();
+});
+```
+
+## Using Async Actions.
+
+It's obvious that at some point you might also want to add some connection points with a backend service. We can either pass a centralized async updater through the `TodoProvider`.
+
+```javascript
+const TodoProvider = ({children}) => {
+  const [state, setState] = useState(['todo1', 'todo2']);
+  const update = useCallback(setState, []);
+  const serverUpdate =
+    (() => {
+      fetch('/api/todos', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      }).then(data => {
+        // Here we can also update the state as
+        // update(state => [...state, data])
+      });
+    },
+    [update]);
+  return (
+    <TodosContext.Provider value={[state, update, serverUpdate]}>{children}</TodosContext.Provider>
+  );
+};
+```
+
+## Going "Wild".
+
+Practicing the compassable selectors' approach we can even combine data from more than one Providers. Although you are highly advised to avoid this path, since you may introduce performance bottlenecks or even inconsistencies across the stored data, in some really rare cases that pattern might be useful.
+
+```javascript title="useMultipleCtxSelector.js"
+export const useMultipleCtxSelector = ([...Contexts], selector) => {
+  const parseCtxs = useCallback(
+    () => Contexts.reduce((prev, curr) => [...prev, useContextSelector(curr)], []),
+    [Contexts]
+  );
+  return useContextSelector(createContext(parseCtxs()), selector);
+};
+```
+
+In the code above we are merging the data from the passed through Contexts and apply the `useContextSelector` hook on a fresh Context created inside the hooks. Keep in mind, that this technique violates the the Hooks concept since `useContextSelector` has been used inside a loop.
+
+## Final Thoughts.
+
+Although the techniques and methodologies described in this tutorial might look a bit overwhelming, complicated or even redundant since Redux has been a community standard I found out it can mature properly, especially for production-grade projects where state management grows by the time. Selectors are great since we can isolate them, compose them and make our components aware of state changes with minimal boilerplate code.
+
+Furthermore, performance-wise, we can limit down unnecessary DOM updates due to lack of architectural decisions, I have found out that using the Context API along with selectors we can also create huge forms with controlled inputs, without side-effects, using declarative form field factories. I promise that I will explain this approach in an upcoming tutorial.
+
+Last but not least, even though Redux can get quite "verbose" as a framework, it has established some fundamentals for code organization. In that manner, once you get familiar with the API you can organize your code properly and newcomers can jump right into, although concepts like action creators, combining reducers or using async actions can get quite tricky.
+
+Our approach takes this mentality a step further. Sure, it lacks the concept of time traveling, actions are not labeled, although we can create a wrapper around our updater, still some solid fundamentals are in place. Overall the main concept behind our approach can get summarized in three principles:
+
+- **Actions are only triggered though components.**
+- **Only selectors can retrieve or update the state.**
+- **Composed selectors are always hooks.**
+
+All in all, state management can be harsh, and working on a solid basis can save you lots of time, effort and boost your productivity and performance reports.
+
+Once more, the entire demo application can be found in [CodeSandbox](https://codesandbox.io/s/react-perfect-state-management-f5h1q) and [GitHub](https://github.com/vorillaz/react-perfect-state-management).
+
+Thanks a lot for your time and patience.
+
+## Glossary and Links.
+
+- [react-redux](https://react-redux.js.org/) <span id="ref1"></span>
+- [Context selectors RFC](https://github.com/reactjs/rfcs/pull/119)
+- [Performance optimization in React docs](https://reactjs.org/docs/optimizing-performance.html#avoid-reconciliation)
+- [@testing-library/react-hooks](https://github.com/testing-library/react-hooks-testing-library)
+- [Time travelling in Redux](https://blog.scottlogic.com/2017/03/09/relogic-2.html)
+- [useState in React docs](https://reactjs.org/docs/hooks-state.html)
+- [useRef in React docs](https://reactjs.org/docs/hooks-reference.html#useref)
+- [shouldComponentUpdate in React docs](https://reactjs.org/docs/optimizing-performance.html#shouldcomponentupdate-in-action)
+- [useMemo in React docs](https://reactjs.org/docs/hooks-reference.html#usememo)
+- [useCallback in React docs](https://reactjs.org/docs/hooks-reference.html#usecallback)
+- [Ramda](https://ramdajs.com/)
+- [Hooks API in React docs](https://reactjs.org/docs/hooks-intro.html)
+- [TodoMVC](http://todomvc.com/)
+- [lodash/fp](https://github.com/lodash/lodash/wiki/FP-Guide)
+- [Redux](https://redux.js.org/)
+- [Pure functions definition](https://en.wikipedia.org/wiki/Pure_function)
+- [Reselect](https://github.com/reduxjs/reselect)

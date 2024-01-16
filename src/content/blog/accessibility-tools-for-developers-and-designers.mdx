@@ -1,0 +1,64 @@
+---
+  title: 'Accessibility Tools for Developers and Designers'
+  pubDate: 'Sep 02 2019'
+  status: 'published'
+  categories: ['a11y', 'javascript']
+  description: 'Start small, build big.'
+---
+
+In [the previous post](/getting-started-with-accessibility "Getting Started with Web Accessibility"), I have covered a few points for getting started with web accessibility, in this one I am going to cover how you can easily set up an A11Y  development environment, how you can measure and report your progress and finally a few ways to automate reporting.
+
+## Start small.
+Getting started with accessibility may seem hard and challenging, especially for teams that are maintaining a legacy codebase.
+Besides learning the fundamentals of accessibility regarding HTML, JavaScript or even designing resilient user interfaces you have to start by establishing a solid working environment, incorporating some tools for yourself and your colleagues.
+You can start by obtaining, measuring, reporting and finally progressively moving toward a more accessible codebase.
+
+## Devtools
+[Edge](https://docs.microsoft.com/en-us/microsoft-edge/devtools-guide/elements/accessibility "Microsoft Edge accessibility docs"), [Firefox](https://developer.mozilla.org/en-US/docs/Tools/Accessibility_inspector "Firefox accessibility docs") [Safari](https://developer.apple.com/library/archive/documentation/Accessibility/Conceptual/AccessibilityMacOSX/OSXAXTestingApps.html "Safari accessibility docs") and [Chrome](https://developers.google.com/web/tools/chrome-devtools/accessibility/reference "Google Chrome accessibility docs") have an inspection mode that provides access to important information exposed to assistive technologies on the current page via the accessibility tree. You can use them to track down any issues, errors or bottlenecks during development.
+
+## Linting
+For legacy or fresh codebases, you can use linting to detect and prevent common accessibility issues. Using linting with standalone tools or ESLint plugins can you started right away. Furthermore, you can also establish a common communication language regardless of accessibility within your team.
+
+- [React A11y](https://github.com/reactjs/react-a11y "React and ESlint accessibility linter") is an ESlint plugin for  JSX
+- [Vue A11Y](https://github.com/vue-a11y "Vue accessibility linter") is a community driven collection of tools for Vue
+- [eslint-plugin-react-native-a11y](https://github.com/FormidableLabs/eslint-plugin-react-native-a11y "React native accessibility linter") works great with React Native projects
+
+
+## Reporting
+Reporting the status and the health status of your codebase can be critical, especially for distributed teams. Using the tools above you can track down your progress, set up goals and make estimations about your upcoming releases.
+- [Pa11y](https://github.com/pa11y/pa11y "Pa11y") is a command-line interface utility that reports accessibility issues.
+- [Tenon](https://tenon.io/ "Tenon.io homepage") is an online crawler that provides instant feedback for 508 and WCAG 2.1 issues.
+- The [Web Accessibility Evaluation Tool](http://wave.webaim.org/extension/ "Web Accessibility Evaluation Tool") is an accessibility browser extension widely used among developers.
+- [Lighthouse](https://developers.google.com/web/tools/lighthouse/ "Lighthouse accessibility report") is a standalone browser extension that produces in-depth reports for accessibility issues.
+- [a11y.css](https://ffoodd.github.io/a11y.css/index.html "a11y.css") is a bookmarklet for reporting issues regarding CSS.
+
+W3C has also a [great list](https://www.w3.org/WAI/ER/tools/ "W3C accessibililty tools") of online services and web accessibility evaluation tools.
+
+## Automate the process
+Reporting can get frustrating at some point, especially for teams than ship to production regularly. Reporting and linting can get automated though, using a CLI tool can easily get integrated with your CI/CD workflow. Additionally, tools like Lighthouse work great with [git-hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks).
+You can even add accessibility checking and reporting within your bundling process upon deployments, [accessibility-webpack-plugin](https://github.com/evcohen/accessibility-webpack-plugin) is a great example of doing so. Last but not least there are some great tools like [accesslint](https://github.com/accesslint) that can work with GitHub's pull requests.
+
+## Testing
+Testing is always a priority for development teams, adapting a workflow for accessibility testing should be established and is critical during the development lifecycle.
+
+- [AxeCore](https://www.deque.com/axe/ "AXE accessibililty tools") is an automated module for end-to-end accessibility tests developed by Deque Systems. You can use AxeCore straight away with [Selenium](https://marmelab.com/blog/2018/02/22/accessibililty-testing-e2e.html) [Jestor](https://github.com/nickcolley/jest-axe) or [Puppeteer](https://marmelab.com/blog/2018/07/18/accessibility-performance-testing-puppeteer.html).
+-[Automated Accessibility Testing Tool](https://github.com/paypal/AATT "Automated Accessibility Testing Tool") or AATT is also an option for end-to-end automated testing. AATT is developed and used by PayPal.
+- [The A11y Machine](https://github.com/liip/TheA11yMachine "The A11y Machine") or a11ym is an automated accessibility testing tool which crawls and tests pages of any Web application to produce detailed reports.
+
+## Manual testing
+The GDS Accessibility team found out that only [~30% of issues are found by automated testing](https://accessibility.blog.gov.uk/2017/02/24/what-we-found-when-we-tested-tools-on-the-worlds-least-accessible-webpage/), thus automation is always a strategy but manual testing can enhance your end users' experience. Testing with a screen reader should form part of your accessibility tests.
+Please note that browser/screen reader combinations matters. It is recommended that you test your application in the browser best suited to your screen reader of choice.
+Some commonly used screen readers/browser combinations can be found below:
+- [NonVisual Desktop Access](https://www.nvaccess.org/) or NVDA is an open source Windows screen reader that is widely used along with Firefox.
+- [VoiceOver](https://www.apple.com/lae/accessibility/mac/vision/) is a popular integrated screen reader on Apple devices along with Safari.
+- Job Access With Speech or JAWS is a prolifically used screen reader on Windows and IE/Edge.
+- Window-Eyes is also commonly used with IE and Edge.
+- ChromeVox is an integrated screen reader on Chromebooks and is available as an extension for Google Chrome.
+
+## Final thoughts
+Getting started developing or designing with accessibility in mind sometimes looks like a headache, especially for teams that work together for a long time and have already established some fundamentals, tools or a common communication language. Luckily though, you can follow some small steps at the beginning and gradually adopt a more "accessible" way of developing, designing or testing. More than ever we can use a plethora of services and create a better more open Web for everyone.
+
+
+
+
+

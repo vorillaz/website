@@ -1,0 +1,43 @@
+---
+  pubDate: 'Apr 15, 2019'
+  status: 'published'
+  title: '#4 - The Arneodo Attractor'
+  heroImage: /imgs/arneodo-attractor.jpg
+  slug: 'arneodo-attractor'
+  categories: ['generative-art', 'javascript']
+  fork: [{
+    title: 'Codepen',
+    url: 'https://codepen.io/TheodoreVorillas/pen/QPdVYp'
+  }]
+  excerpt: 'Chaotic maps and three.js'
+---
+
+In the mathematical field of dynamical systems, an attractor is a set of numerical values toward which a system tends to evolve, for a wide variety of starting conditions of the system.
+System values that get close enough to the attractor values remain close even if slightly disturbed.
+
+In finite-dimensional systems, the evolving variable may be represented algebraically as an n-dimensional vector. The attractor is a region in n-dimensional space. In physical systems, the n dimensions may be, for example, two or three positional coordinates for each of one or more physical entities; in economic systems, they may be separate variables such as the inflation rate and the unemployment rate.
+
+Since 1963, when Eddard Lorenz started experimenting with evolution functions, also knowns as chaotic maps, lots of systems have been also introduced. Chaotic maps tend to produce chaotic results for certain parameter values and initial conditions.  The visualization of a chaotic map displays the phase space of a chaotic dynamical system.
+
+Since I got myself investigating chaotic systems and generative art, I decided to recreate a few famous attractors using `three.js`, getting started with the Arneodo attractor.
+
+Arneodo attractor was introduced in 1981 as part of studying chaotic behaviors which may arise in some dynamical systems. As a result, the system with certain parameters creates wonderful, mesmerizing spirals with chaotic behavior.
+
+The algorithm for the attractor is fairly simple:
+```javascript title="arneodo.js"
+const a = 5.5;
+const b = 3.5;
+const c = 0.01;
+
+const next = (x,y,z) => {
+  const dx = y;
+  const dy = z;
+  const dz = a * x - b * y - z - c * Math.pow(x, 3);
+  return {dx,dy,dz};
+};
+```
+
+The demo page of the attractor recreates a spline using the `CatmullRomCurve3` class, more than 20 thousand points are dynamically calculated and rendered in the scene. Finally, using the `DirectionalLight` class I was able to create a more interesting visualization of the system.
+
+## References
+- [Possible New Strange Attractors With Spiral Structure](https://projecteuclid.org/download/pdf_1/euclid.cmp/1103909142) <span id="ref1"></span>

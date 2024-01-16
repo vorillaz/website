@@ -1,0 +1,47 @@
+---
+  pubDate: 'Apr 11 2019'
+  status: 'published'
+  title: '#5 - The Dadras Attractor'
+  heroImage: '/imgs/dadras-attractor.jpg'
+  slug: 'dadras-attractor'
+  categories: ['generative-art', 'javascript']
+  excerpt: 'Generative systems with chaotic behavior.'
+  fork: [{
+    title: 'Codepen',
+    url: 'https://codepen.io/TheodoreVorillas/pen/LvWKGp'
+  }]
+---
+
+import Video from '@/components/Video.astro';
+
+The Dadras or Dadras-Momemi Attractor looks like a complex wave trapped into three dimensions.
+It can be used to describe a Wang 3-scroll chaotic system.
+The most interesting part about the Dadras attractor though is that the system can accept random values within a range as parameters and generate interesting shapes with chaotic behavior.
+
+## Demo simulation
+
+<Video src="https://media.giphy.com/media/QU97uV1ZAqEKrVqW1C/source.mp4" />
+
+## The algorithm
+
+```javascript title="dadras-attractor.js"
+const getRandomArbitrary = (min, max) => {
+  return Math.random() * (max - min) + min;
+};
+
+const a = getRandomArbitrary(2, 3);
+const b = getRandomArbitrary(1.9, 2.7);
+const c = getRandomArbitrary(1.3, 1.7);
+const d = getRandomArbitrary(1.2, 2);
+const e = getRandomArbitrary(7, 9);
+
+const next = (x,y,z) => {
+  const dx = y - a * x + b * y * z;
+  const dy = c * y - x * z + z;
+  const dz = d * x * y - e * z;
+  return {dx,dy,dz};
+};
+```
+
+## References
+- [Analysis of a new 3D smooth autonomous system with different wing chaotic attractors and transient chaos](https://link.springer.com/article/10.1007/s11071-010-9726-2) <span id="ref1"></span>

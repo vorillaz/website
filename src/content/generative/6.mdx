@@ -1,0 +1,43 @@
+---
+  pubDate: 'Apr 13 2019'
+  status: 'published'
+  title: '#6 - The Dequan Li Attractor'
+  heroImage: '/imgs/dequan-li-attractor.jpg'
+  slug: 'dequan-li-attractor'
+  categories: ['generative-art', 'javascript']
+  fork: [{
+    title: 'Codepen',
+    url: 'https://codepen.io/TheodoreVorillas/pen/BEdrJp'
+  }]
+  excerpt: 'Generative systems with chaotic behavior.'
+---
+
+A new 3D autonomous dynamical system proposed by Dequan Li _(Physics
+Letters A, 372, 387, 2008.)_ produces a chaotic attractor whose global topological
+properties are unusual. The attractor has a rotation symmetry and only a single real
+fixed point for the parameters used in his study. The symmetric, complex pair of fixed
+points cannot be ignored: they play a major role in organizing the motion on a surface
+of peculiar toroidal type. [#1](#ref1)
+
+## The algorithm
+
+```javascript title="dequan-li.js"
+
+const a = 40.0;
+const b = 1.833;
+const c = 0.16;
+const d = 0.65;
+const e = 55.0;
+const f = 20.0;
+
+const next = (x,y,z) => {
+  const dx = a * (y - x) + c * x * z;;
+  const dy = e * x + f * y - x * z;
+  const dz = b * z + x * y - d * x * x;
+  return {dx,dy,dz};
+};
+```
+
+## References
+- [Poincar´e sections for a new three-dimensional toroidal attractor](http://www.physics.drexel.edu/~bob/Papers/Torochaos.pdf) <span id="ref1"></span>
+- [Processing :De Quan Li Attractor](http://www.iaacblog.com/programs/processing-de-quan-li-attractor/)

@@ -1,0 +1,92 @@
+---
+  title: 'An Introduction to Chaos Theory and Generative Art'
+  status: 'draft'
+  pubDate: 'Jan 11, 2024'
+  heroImage: '/imgs/chaos-and-generative-art.jpg'
+  imgCredits: {
+    username: 'Darius Bashar',
+    url: 'https://unsplash.com/@dariusbashar'
+  }
+  categories: ['generative-art', 'misc']
+  description: 'Chaotic systems and generative art'
+---
+## Introduction
+
+Chaos theory is the study of how systems that follow simple, straightforward, deterministic laws can exhibit very complicated and seemingly random long term behavior. A classic example of this is the weather. Individual molecules of air all conform to basic laws of physics, but global weather patterns are anything but simple.
+
+A hallmark of chaotic systems is sensitive dependence on initial conditions. This means that if two copies of the system differ by only a very small amount, then after a relatively short period of time, the two systems will diverge and appear very different from each other. The "butterfly effect" is an example of this, alluding to the idea that the flap of a butterfly's wings in Africa can cause a cascade of events culminating in a tornado in Texas. This sensitive dependence on initial conditions also guarantees that weather forecasting will not be accurate for more than a few days in advance.
+
+Chaos can also be seen in systems as diverse as electrical circuits, oscillating chemical reactions, and fluid dynamics, and planetary bodies orbiting each other. However, many real world systems such as the weather involve far too many particles to analyze precisely with computers, but much of the essential behavior which makes these systems chaotic can also be found in much simpler systems that are much more easily analyzed with pencil and paper and simulated with computers. Researchers study these simpler systems in the hope that they will shed light on the more complicated real-world phenomena. [#1](#ref1)
+
+## The Edward Lorenz Attractor
+
+When was chaos first discovered? The first true experimenter in chaos was a meteorologist, named Edward Lorenz. In
+1960, he was working on the problem of weather prediction. He had a computer set up, with a set of twelve equations to
+model the weather. It didn't predict the weather itself. However this computer program did theoretically predict what the
+weather might be.
+
+One day in 1961, he wanted to see a particular sequence again. To save time, he started in the middle of the sequence, instead of the beginning. He entered the number off his printout and left to let it run.
+
+When he came back an hour later, the sequence had evolved differently.
+Instead of the same pattern as before, it diverged from the pattern, ending up wildly different from the original. Eventually he figured out what happened. The computer stored the numbers to six decimal places in its memory. To save paper, he only had it print out three decimal places. In the original sequence, the number was `0.506127`, and he had only typed the first three digits, `0.506`.
+By all conventional ideas of the time, it should have worked. He should have gotten a sequence very close to the original
+sequence. A scientist considers himself lucky if he can get measurements with accuracy to three decimal places. Surely
+the fourth and fifth, impossible to measure using reasonable methods, can't have a huge effect on the outcome of the
+experiment. Lorenz proved this idea wrong.
+
+This effect came to be known as the butterfly effect. The amount of difference in the starting points of the two curves is
+so small that it is comparable to a butterfly flapping its wings.
+
+>The flapping of a single butterfly's wing today produces a tiny change in the state of the atmosphere. Over a
+period of time, what the atmosphere actually does diverges from what it would have done. So, in a month's
+time, a tornado that would have devastated the Indonesian coast doesn't happen. Or maybe one that wasn't
+going to happen, does. _(Ian Stewart, Does God Play Dice? The Mathematics of Chaos, pg. 141)_
+
+This phenomenon, common to chaos theory, is also known as sensitive dependence on initial conditions. Just a small
+change in the initial conditions can drastically change the long-term behavior of a system. Such a small amount of difference in a measurement might be considered experimental noise, background noise, or an inaccuracy of the
+equipment.
+
+From this idea, Lorenz stated that it is impossible to predict the weather accurately. However, this discovery led Lorenz on
+to other aspects of what eventually came to be known as chaos theory.
+Lorenz started to look for a simpler system that had sensitive dependence on initial conditions. His first discovery had
+twelve equations, and he wanted a much more simple version that still had this attribute. He took the equations for
+convection, and stripped them down, making them unrealistically simple. The system no longer had anything to do with
+convection, but it did have sensitive dependence on its initial conditions, and there were only three equations this time.
+Later, it was discovered that his equations precisely described a water wheel.
+
+>At the top, water drips steadily into containers hanging on the wheel's rim. Each container drips steadily
+from a small hole. If the stream of water is slow, the top containers never fill fast enough to overcome
+friction, but if the stream is faster, the weight starts to turn the wheel. The rotation might become
+continuous. Or if the stream is so fast that the heavy containers swing all the way around the bottom and up
+the other side, the wheel might then slow, stop, and reverse its rotation, turning first one way and then the
+other. _(James Gleick, Chaos - Making a New Science, pg. 29)_
+
+The equations for this system also seemed to give rise to entirely random
+behavior. However, when he graphed it, a surprising thing happened. The
+output always stayed on a curve, a double spiral. There were only two kinds of
+order previously known: a steady state, in which the variables never change,
+and periodic behavior, in which the system goes into a loop, repeating itself
+indefinitely. Lorenz's equations were definitely ordered - they always followed
+a spiral. They never settled down to a single point, but since they never
+repeated the same thing, they weren't periodic either. He called the image he
+got when he graphed the equations the Lorenz attractor. [#2](#ref2)
+
+## About Generative Art
+Generative art refers to art that in whole or in part has been created with the use of an autonomous system.
+Autonomous systems are in general math models, equations or methods which can produce art based on decisions taken from non-human sources.
+In some cases, artists are using computers algorithms or even systems from chemistry, biology, mechanics, and more.
+Artists can also use a closed system and create art by applying a predefined set of parameters with randomized input.
+
+Randomness is one type of an autonomous system. Incorporating chance into a piece of code art, you get different and unique results. A naive approach of such an artistic process can be achieved by rolling dices and visualizing the result per throw.
+
+## Chaotic Maps
+In mathematics, a chaotic map is an evolution function that exhibits some sort of chaotic behavior.
+Discrete maps usually take the form of iterated functions.
+Since chaotic maps may be parameterized by a discrete-time or a continuous-time parameter they can produce graphs, charts or plots with unique results as parameters change.
+In 1963, Edward Lorenz developed a simplified mathematical model for atmospheric convection also known as Lorenz attractor.
+
+
+## References
+- [Determinism and Chaos](http://pi.math.cornell.edu/~lipa/mec/lesson1.html) <span id="ref1"></span>
+- [Chaos Theory: A Brief Introduction](https://courses.seas.harvard.edu/climate/eli/Courses/EPS281r/Sources/Chaos-and-weather-prediction/1-Chaos-Theory-A-Brief-Introduction-IMHO.pdf)  <span id="ref2"></span>
+- [About Generative Art](https://en.wikipedia.org/wiki/Generative_art) <span id="ref0"></span>

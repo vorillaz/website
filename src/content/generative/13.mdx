@@ -1,0 +1,39 @@
+---
+  pubDate: 'Jan 13 2020'
+  status: 'published'
+  title: '#13 - Blocks'
+  heroImage: '/imgs/blocks.jpg'
+  slug: 'blocks'
+  categories: ['generative-art', 'javascript']
+  fork: [{
+    title: 'Codepen',
+    url: 'https://codepen.io/TheodoreVorillas/pen/PowaBJB'
+  }]
+  excerpt: 'Loop inside a Loop.'
+---
+
+Using blocks on a nested grid we can recreate generative patters as symbols, each block is divided into symmetrical unique subsections with binary coloring.
+P5 is used for rendering and updates on the canvas. Besides calculating the distance between the elements, the whole project was born using a nested loop.
+Finally, we can evolve this project recreating a set of generated glyphs.
+
+## The algorithm
+```javascript
+const draw = () => {
+  let xx, yy;
+  cells.forEach((cell, i) => {
+    cell.forEach((c, j) => {
+      xx = getNextX(i,j);
+      yy = getNextY(i,j);
+
+      beginShape();
+      fill('#191919');
+
+      rect(xx, yy, cellWidth, cellWidth);
+      endShape();
+    });
+  });
+};
+```
+
+## References
+- [Generative Logo Design](https://components.ai/notes/logo)

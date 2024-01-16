@@ -1,0 +1,51 @@
+---
+  pubDate: 'Feb 02 2019'
+  status: 'published'
+  heroImage: '/imgs/raspberry-pi-and-node-js.jpg'
+  imgCredits: {
+    username: 'Louis Reed',
+    url: 'https://unsplash.com/@_louisreed'
+  }
+  title: 'Install Node.js on a Raspberry Pi'
+  keywords: ['iot', 'internet of things', 'JavaScript', 'raspberry pi', 'breadboard', 'Node.js', 'hardware']
+  categories: ['iot', 'javascript', 'node-js']
+  description: 'Seamless installation without using binaries or package managers.'
+---
+
+If you want to start developing with Node.js and Raspberry Pi boards you may found yourself troubled, especially if you own Raspberry Pi Zero or Zero W. The thing is that ARMv6l architecture is no longer supported by NodeSource binaries, thus installing Node.js with `apt-get`, the Linux package manager, is not possible.
+
+You can always download the binary, load it into your board and install Node.js but instead in this tutorial, we are going to use the official Node.js distribution repository and automate the process.
+
+## Node.js releases
+In the official [Node.js distribution repository](https://nodejs.org/dist/ "Node.js distribution repository") you can find the official releases as well as builds for different architectures listed. We are interested in the ARMv6l binaries: for instance, if you want to install the `v9.9.0` version, you have to look for the relevant resource.
+In our case, it will be `https://nodejs.org/dist/v9.0.0/node-v9.9.0-linux-armv6l.tar.gz`.
+
+ ## Installing Node.js
+SSH into your board and execute the following command
+```bash
+curl -o node-v9.9.0-linux-armv6l.tar.gz https://nodejs.org/dist/v9.9.0/node-v9.9.0-linux-armv6l.tar.gz
+```
+The command above will download the binary to your device, afterward, we will unzip the contents as:
+```bash
+tar -xzf node-v9.9.0-linux-armv6l.tar.gz
+```
+Finally, we will add Node.js to the correct location and expose it as globally available command using:
+```bash
+sudo cp -r node-v9.9.0-linux-armv6l/* /usr/local/
+```
+The copied binaries are now exposed to your `$PATH` and you can test that everything works as expected just by checking the NPM and Node.js versions :
+```bash
+~ node -v
+└── v9.9.0
+~ npm -v
+└── 6.4.1
+```
+In order to be safe with future updates, you will also have to install Git since NPM is heavily coupled with it. You may install Git as:
+
+```bash
+sudo apt-get install git
+```
+
+## Final thoughts
+You can always use [Balena](https://www.balena.io/docs/learn/getting-started/raspberry-pi/nodejs/ "Balena Node.js installation") in order to automate the installation and future upgrades. Also, there is a lovely, curated [repository](https://github.com/sdesalas/node-pi-zero "Raspberry Pi Zero and Node.js repository") with plug and play installation scripts for Raspberry Pi Zero and Raspberry Pi Zero W devices.
+

@@ -1,0 +1,89 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { slugify } from "@/lib/utils";
+import { Image } from "astro:assets";
+import PostLayout from "@/layouts/PostLayout.astro";
+
+export interface Props {
+  post: CollectionEntry<"generative">;
+}
+const { post } = Astro.props;
+const { Content } = await post.render();
+const { title, heroImage, pubDate, updatedDate, fork } = post.data;
+
+const pubstr = pubDate.toISOString();
+const updatedstr = updatedDate?.toISOString();
+---
+
+<PostLayout title={title}>
+  <article
+    id="article"
+    role="article"
+    class="prose lg:prose-xl dark:prose-dark min-w-full"
+  >
+    <h1 transition:name={slugify(title)} class="post-title">{title}</h1>
+    <!-- Date and time -->
+    <p class="text-sm text-gray-500 dark:text-gray-400">
+      Published on{" "}
+      <time datetime={pubstr} class="font-medium">
+        {
+          new Date(pubDate).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        }
+      </time>
+      {
+        updatedDate && (
+          <>
+            {" "}
+            &middot; Updated on{" "}
+            <time datetime={updatedstr} class="font-medium">
+              {new Date(updatedDate).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </time>
+          </>
+        )
+      }
+
+      <>
+        {
+          heroImage && (
+            <div class="flex justify-center">
+              <Image
+                src={heroImage}
+                width={812}
+                height={500}
+                quality={100}
+                format="jpg"
+                loading="eager"
+                class="rounded-md w-auto my-8 object-cover"
+                alt={`img of ${title}`}
+              />
+            </div>
+          )
+        }
+      </>
+      <Content />
+
+      {
+        fork && fork.length > 0 && (
+          <>
+            <h2>Links</h2>
+            <ul>
+              {fork.map((f) => (
+                <li>
+                  <a href={f.url}>{f.title}</a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+    </p>
+  </article>
+</PostLayout>
