@@ -1,0 +1,418 @@
+---
+  pubDate: 'Jan 17 2024'
+  status: 'published'
+  title: 'How to Dockerize a Next.js app'
+  heroImage: '/imgs/dockerize-next-js.jpeg'
+  imgCredits: {
+    username: 'Fejuz',
+    url: 'https://unsplash.com/@fejuz'
+  }
+  categories: ['docker', "nextjs", "javascript"]
+  description: 'Build and deploy a Next.js application using Docker.'
+---
+
+<Note>The code for this tutorial is available on [GitHub](https://github.com/vorillaz/website/tree/main/examples/docker-nextjs-app)</Note>
+
+Next.js is like the Swiss Army knife for creating React applications. It makes the process smooth, offering outstanding performance and a top-notch developer experience. But, when it comes to deploying an application you've built outside of a major deployment provider, it can get a bit tricky. Managing dependencies, configuring the environment, and making sure everything behaves consistently across different platforms .
+
+Now, here's where Docker comes into play. We're going to wrap up your Next.js application, its environment, and all its dependencies into a small little container. Think of a container as your application running in a stripped-down version of Linux. The brain and hearts of your application t's called a Docker image – the blueprint for your container. The container itself? That's your application running based on that master plan.
+
+To make this magic happen, we use a declarative method through something called a Dockerfile. It's like giving Docker a to-do list. Docker then reads and executes the instructions in this file, building and deploying your application.
+
+## **Why You Should Containerize Your Next.js App with Docker**
+  
+There are several reasons why you might want to consider containerizing your Next.js application with Docker. Here's a list of advantages:
+
+1. **Consistent behavior across environments**: Docker containers ensure your Next.js app behaves consistently across different platforms and environments.
+
+2. **Easy Deployment and Scaling:** Docker enables straightforward deployment and scaling of your Next.js app to multiple instances. This makes it easier to handle traffic spikes and meet high availability requirements.
+
+3. **Portablability:** Docker containers are portable and shareable. You can collaborate seamlessly with team members or deploy your app to different environments without manual configuration headaches.
+
+4. **Cost-Effective Infrastructure**: Managing your own deployment environment can be cost-effective. Docker allows you to self-host multiple isolated Next.js applications on a single machine or move across different hosting vendors, saving you time and resources.
+
+5. **Streamlined Dependency Management:** Bundling all your app's dependencies within a Docker container eliminates the need for manual installation and management on the host environment.
+
+## Containerizing Your Next.js App: A Step-by-Step Guide
+
+### Install docker.
+
+  
+
+First things first, you need to ensure that you have Docker installed on your machine. Once done, run the Docker daemon and ensure that everything works as expected. You can check by running a simple command in your terminal.
+
+  
+  
+
+```bash
+
+❏ ~ docker info
+
+Client:
+	Version: 24.0.7
+	Context: orbstack
+	Debug Mode: false
+Plugins:
+	buildx: Docker Buildx (Docker Inc.)
+	Version: v0.12.0
+
+```
+
+  
+
+  
+
+### Edit the `next.config.js` File
+
+  
+
+In order to build your Next.js app as a container, you need to change the configuration of your project.
+
+Next.js can automatically create a standalone folder that copies only the necessary files for a production deployment including all your `node_modules`.
+
+  
+
+```js
+
+/** @type {import('next').NextConfig} */
+module.exports = {
+  output: "standalone",
+};
+```
+
+  
+
+  
+
+  
+
+### Create a `.dockerignore` file 
+
+We need to create a `.dockerignore` file as we don't want to increase the size of our docker image with unnecessary files tranfered to the container. You can create a `.dockerignore` file in the root of your project and add the following content:
+
+
+```bash title=".dockerignore"
+
+.dockerignore
+
+# Not needed as we are bundling the whole app
+node_modules
+# Log files
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.next
+.git
+```
+
+  
+
+  
+
+### Create the Dockerfile
+
+  
+
+You can now create a Dockerfile that describes how your image gets built. We are going to use the `pnpm` package manager, but you can also use `npm` or `yarn` instead. The `Dockerfile` will be placed on the root of your project and it will look like this:
+
+  
+  
+  
+
+```docker title="Dockerfile"
+FROM node:20-alpine AS base
+
+  
+
+### Dependencies ###
+FROM base AS deps
+RUN apk add --no-cache libc6-compat git
+
+  
+
+# Setup pnpm environment
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+RUN corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile --prefer-frozen-lockfile
+
+# Builder
+FROM base AS builder
+
+RUN corepack enable
+RUN corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN pnpm build
+
+
+### Production image runner ###
+FROM base AS runner
+
+# Set NODE_ENV to production
+ENV NODE_ENV production
+
+# Disable Next.js telemetry
+# Learn more here: https://nextjs.org/telemetry
+ENV NEXT_TELEMETRY_DISABLED 1
+
+# Set correct permissions for nextjs user and don't run as root
+RUN addgroup nodejs
+RUN adduser -SDH nextjs
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+USER nextjs
+
+# Exposed port (for orchestrators and dynamic reverse proxies)
+EXPOSE 3000
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "wget", "-q0", "http://localhost:3000/health" ]
+
+# Run the nextjs app
+CMD ["node", "server.js"]
+```
+
+
+Let's break this down a bit. We will divide our building process into multiple steps, allowing us to utilize Docker's caching mechanism. Our base image is `node:20-alpine`, which is relatively small in size. For each step, we will instruct PNPM to cache the module installation.
+
+On the `deps` step, we will bundle our dependencies. We need to move the `package.json` and `pnpm-lock.yaml` lock file into our working directory and install all the project's dependencies. Since Next.js will bundle the production dependencies, we don't need to install `devDependencies` and the production ones separately.
+
+
+This building step will significantly speed up our building process, as it is internally cached by the Docker engine. Additionally, pnpm's symlinking strategy and internal caching will install our modules at an extremely fast pace.
+
+Next, we have the building step. Once we switch to our working directory, we will copy our `node_modules` from the previous step, then we will copy the entire project and run `pnpm build`. This action will trigger the script defined in our `package.json`, after which we can proceed to the final step.
+
+The `runner` step is where we will ultimately create our Docker image. We need to set up a user and a group with limited permissions, as we don't want to run our application as `root` within our container. Once done, we will copy the `/.next/standalone`, `.next/static`, and `/public` folders from our `builder` step. Next.js' standalone mode bundles everything into an isolated bundle, so we don't need to worry about copying any other folders. Note that there is also a `.next/BUILD_ID` file that you can use to differentiate your builds. We also need to set up our `NODE_ENV` environmental variable to `production`, as many npm modules heavily rely on this setting.
+
+Finally, we will expose port 3000, as this is the default port Next.js listens to. As an added little extra, we have included a healthcheck, pinging our `/health` API route. This step will ensure that the container is ready before launching the web server. After that, we will run our server by executing `CMD ["node", "server.js"]`.
+
+### Build the image and run the container
+
+  
+
+If you followed along this tutorial, you are now ready to build your Next.js application.
+
+Head to your terminal and build your image by running:
+
+```bash
+❏ ~ docker build -t my-nextjs-docker .
+```
+
+  
+
+Once done, you may try to rerun the building process and obtain the building logs, you will see that all the steps are internally cached and the building process just takes a few seconds.
+
+```bash {9-11}
+❏ ~ docker build -t my-nextjs-docker .
+
+[+] Building 2.6s (25/25) FINISHED docker:orbstack
+=> [internal] load build definition from Dockerfile 0.0s
+
+=> transferring context: 225B 0.0s
+=> [internal] load metadata for docker.io/library/node:20-alpine 2.6s
+
+=> CACHED [runner 1/7] RUN addgroup nodejs 0.0s
+=> CACHED [runner 2/7] RUN adduser -SDH nextjs 0.0s  
+=> CACHED [runner 3/7] RUN mkdir .next
+```
+
+
+You can also find out the building details about your image by using the `docker images` command.
+
+```bash
+
+❏ ~ docker images my-nextjs-docker
+
+REPOSITORY TAG IMAGE ID CREATED SIZE
+--
+my-nextjs-docker latest 09462a81711b 14 hours ago 155MB
+```
+
+  
+
+Now it's time to finally start our container, we need to bind port 3000 to our container and spin up the image.
+
+```bash
+❏ ~ docker run -p 3000:3000 my-nextjs-docker
+```
+
+  
+
+The output in your terminal will show you that the application is running.
+
+```bash
+
+❏ ~ docker run -p 3000:3000 my-nextjs-docker
+
+  ▲ Next.js 14.0.4
+  - Local: http://localhost:3000
+  - Network: http://0.0.0.0:3000
+  ✓ Ready in 39ms
+
+```
+
+
+You can now head over to `http://localhost:3000` and you will get prompted by the Next.js default homepage.
+
+### Envinromental Variables
+
+Next.js offers a reliable way for managing environmental variables through `.env` files. You can create separate `.env` files, and the suffix determines the setup environment. Keep in mind that the deployment environment is not actually bound to the `NODE_ENV` environmental variable. Even when running our container into the `staging` the `NODE_ENV` variable is set to `production`.
+
+So, first things first, we need to create three sample files, one for each deployment envinronment (`dev`, `staging`, `production`).
+
+```bash
+❏ ~ touch .env.local.sample .env.production.sample .env.staging.sample
+```
+
+
+You can now add a variable inside each file.
+
+```bash
+MY_ENV=This is my production envinronment variable
+```
+
+  
+
+And display that value in your Next.js landing page:
+
+```tsx
+
+export default function Home() {
+  return (
+    <div className={styles.description}>
+      <div>Coming from `.env`: {process.env.MY_ENV}</div>
+    </div>
+  );
+}
+
+```
+
+
+Then we need to copy the sample `.env` files into our image. To achieve this, we will pass the building environment as an argument through the `build` command, so we need to modify our `Dockerfile` accordingly.
+
+For the first step, let's declare an argument called `SETUP_ENVINROMENT`. This argument is set to `production` by default.
+
+```dockerfile
+FROM node:20-alpine AS base
+ARG SETUP_ENVINROMENT=production
+```
+
+  
+
+Then for the `builder` step we will use the `SETUP_ARGUMENT`, copy and rename the appropriate `.env` file.
+
+```docker
+
+FROM base AS builder
+RUN corepack enable
+RUN corepack prepare pnpm@latest --activate
+WORKDIR /app
+
+# Copy the .env{SETUP_ENVINROMENT} file to the container
+# This will copy the .env.production.sample -> .env file if the SETUP_ENVINROMENT is production
+COPY .env.$SETUP_ENVINROMENT.sample .env
+```
+
+You can try to build separate images for each deployment envinroment, try to also change the `MY_ENV` variable and rerun each container.
+
+```bash
+❏ ~ echo Building staging env
+❏ ~ docker build --build-arg SETUP_ENVINROMENT=staging --tag my-app-docker-staging .
+```
+
+### Create a CI/CD Pipeline
+
+The process of creating and deploying a Docker image is referred to as a pipeline. A pipeline is a sequence of steps that are executed one after the other to build and deploy your application. You can use a CI/CD tool to automate this process and simplify your deployment management.
+
+There are several CI/CD tools available for automating Docker deployments, such as Jenkins, CircleCI, and Travis CI. In this tutorial, we will utilize GitHub Actions to automate our Docker deployments.
+
+### Create the Release Workflow  
+
+GitHub Actions is a CI/CD tool that enables you to automate your software development workflows. It offers a collection of predefined workflows that you can use to streamline your deployments and it's almost free for hobby and open source projects.
+
+In order to design a custom workflow for our project, we need to create a YAML file within our repository. This file contains the steps that will be executed to build and deploy our project. 
+
+In order to publish our image on Docker Hub as a publicly accessible image, we need to generate a token in Docker Hub. You can create a token by navigating to your Docker Hub account and then to `Account Settings -> Security -> New Access Token`. You can label your token and grant it  with `read` and `write` permissions.
+
+Next, add the token to your GitHub repository as a secret accessible to GitHub actions. You can do so by visiting your repository and then heading to `Settings -> Secrets and Variables -> Actions`. Add two new repository secrets named `DOCKER_USER` and `DOCKERHUB_TOKEN`, and set their values to your Docker username and the token you just created.
+
+Once completed, you can proceed to your GitHub repository and create a new file in the `.github/workflows` directory. You can name the file `release.yml` and insert the following content:
+
+  
+
+```yaml title="./github/workflows/release.yml"
+name: Build and Publish Docker image
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3.5.3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2.9.1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2.2.0
+        with:
+          username: ${{ vars.DOCKER_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ vars.DOCKER_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ vars.DOCKER_USER }}/my-nextjs-docker
+          readme-filepath: ./README.md
+
+      - name: Build and push
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ vars.DOCKER_USER }}/my-nextjs-docker:latest
+          platforms: linux/amd64,linux/arm64/v8
+```
+
+  
+
+The configuration might initially appear somewhat complex, but let's break it down into smaller components.
+
+First, we need to define the triggering actions for our workflow. In our case, we want to initiate the workflow upon every push to the `main` branch. Next, we need to define the jobs that will be executed.
+
+We also have a single job called `docker` that will run on the most recent version of Ubuntu. The job consists of a single step that checks out the code, followed by the setup of the Docker Buildx plugin. Buildx is a Docker CLI plugin that extends the docker command with the complete support of the features provided by the Moby BuildKit builder toolkit.
+
+Aftewards, we need to log in to Docker Hub using the `docker/login-action` action. Then, we need to set up the description of our Docker image using the `peter-evans/dockerhub-description` action. Finally, we need to build and push our image using the `docker/build-push-action` action and we are basically done.
+
+  
+
+## Wrapping Up 
+
+In this tutorial, we explored how to containerize a Next.js application using Docker. We also delved into automating our Docker deployments using GitHub Actions. We hope that this tutorial will serve as a helpful introduction to Docker and Next.js. If you have any questions or suggestions, please do not hesitate to get in touch. 
+Additionally, you may want to check out the complete [example](https://github.com/vorillaz/website/tree/main/examples/docker-nextjs-app) of this tutorial.

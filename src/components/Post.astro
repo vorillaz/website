@@ -2,8 +2,8 @@
 import type { CollectionEntry } from "astro:content";
 import { slugify } from "@/lib/utils";
 import { Image } from "astro:assets";
-
 import PostLayout from "@/layouts/PostLayout.astro";
+import Note from "./Note.astro";
 
 export interface Props {
   post: CollectionEntry<"blog">;
@@ -75,7 +75,11 @@ const updatedstr = updatedDate?.toISOString();
           )
         }
       </>
-      <Content />
+      <Content
+        components={{
+          Note,
+        }}
+      />
     </p>
   </article>
 </PostLayout>
