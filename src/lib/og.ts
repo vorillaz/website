@@ -1,6 +1,5 @@
 import satori, { type SatoriOptions } from "satori";
 import { Resvg } from "@resvg/resvg-js";
-import { type CollectionEntry } from "astro:content";
 import ogTemplate from "./templates/og";
 
 const fetchFonts = async () => {
