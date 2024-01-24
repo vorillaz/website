@@ -1,0 +1,100 @@
+---
+pubDate: Jan 24 2024
+title: Scale from 1 to Millions of Users Without Breaking the Bank
+status: draft
+categories:
+  - docker
+  - javascript
+  - nextjs
+  - scalability
+  - devops
+  - systems
+description: How to scale a Next.js application to millions of users without compromises.
+---
+
+When it comes to hot topics, there is always a huge question that strikes controversy among the development community: 
+> Does X/Y/Z framework scale properly? 
+
+And the answer is always the same, maybe. But then we have to folow up with a few more questions:
+
+What's the cost? What are the tradeoffs? Which deployment platform should we use? What's the best way to deploy our application? Do we need a custom solution or should we use a managed service? Is AWS the only way to go? How can we scale our application to millions of users?
+
+## The Problem
+
+In a world where the way we are developing web applications changes rapidly, the way we are treating scalability has also changed dramatically. New frameworks have emerged in the JavaScript community trying to simplify the process of publishing a web application, but they are also coming along with compromises, tons of assumptions, and they might not always be a good fit for every single use case.
+
+In this detailed series of articles, I will try to provide a generic guide for scaling a web application from 1 up to a few million users in a linear and progressive way. We are going to document each step, use open-source technologies, and create a scale-as-you-go plan without breaking the bank.
+
+## Choosing the best framework for the Job
+
+For the purpose of this series, we are going to build a Next.js application. Next.js has been a widely adopted framework built and maintained by Vercel. The reason for choosing Next.js is its popularity, along with the idea that we can decouple the deployment process without relying on a "major" deployment provider.
+
+While this guide offers generic guidance for Next, you can also use Remix, Nuxt, Sveltekit, Blitz, or any other framework of your choice. The real advantage of picking Next.js or any other mentioned framework lies in its versatility. 
+It allows the creation of web applications with SSR (Server Side Rendering), making it a genuinely good candidate to demonstrate how we can build an application for both the frontend and backend.Furthermore, since Vercel provides A-class support for building, deploying, and monitoring along with "infinite scalability", it's also a great case study on how we can build applications without solely relying on "the cloud".
+
+## Leaving the Cloud?
+
+In 2023, 37Signals began documenting their journey of leaving the cloud. The idea was simple yet bold—they moved their main products away from AWS, deciding to purchase and deploy their own infrastructure on-premises, utilizing dedicated servers for deployment. Of course, this approach may not be viable for everyone, as it demands a good investment in both money and resources that may not be available for you or your team.
+
+The economics might not be a good fit, especially for a project that is in its early days, considering that most major hosting providers offer free plans that can sustain you for some time. Still, we can provide a few strong arguments for not choosing a major "provider" like Vercel or AWS and instead moving along with a hosting company that is also reliable but requires some work and planning ahead. The benefits can be quite obvious.
+
+### We are not Coupled to Tradeoffs.
+Deploying to a major provider like Vercel or AWS can be quite a tradeoff. While it's true that you can get started with a few clicks, you are also tied to the ecosystem of the provider. You have to use their tools, their services, and their code tradeoffs. Next.js is a great example of a framework that is built around the ecosystem of Vercel. While it's true that you can deploy a Next.js application anywhere, the framework is built around the idea of serverless functions and the Vercel platform, which run on top of AWS. If you want to run a Next.js application along with a database, a Redis instance, or a cron job, well you simply can't. 
+
+
+### It's Cheaper.
+
+Vercel, fly.io, Render, or Netlify might **not** be good candidates for comparison as they are services built around AWS, GCP, Azure, or Cloudflare. They actually function as "middlemen" companies, providing a better developer (DX) experience using resources with "better deals" on resources (infrastructure) than what you can get directly. 
+Vercel, for example, also heavily invests in their "scalability" around the serverless ecosystem from AWS. Even though the comparison might not be ideal, it's definitely cheaper to use a cloud provider like Hetzner, Scaleway, or DigitalOcean (and many others).
+
+As of the time of writing this series (January 2024), for a naive comparison, the cost of an EC2 server in AWS (_t3a.large_) is almost $630 per month, while on Hetzner, it's just $15.48. Considering there are also offers and discounts running throughout the year, you and your team can save even more money. Furthermore, providing a portable and versatile solution for deploying your web applications can be a lifesaver if the hosting providers of your choice decide to start price gouging.
+
+There might be hidden costs that you might not even consider when talking about side projects. Due to limitations of platforms like Vercel, simple DevOps operations like hosting a MySQL database, running a few cron jobs, or using Redis can actually accumulate tons of hidden costs.
+
+Also, the "infinite scalability" mantra that these platforms advertise might lead to infinite costs. There are horrific stories out there from people who got billed with huge amounts of money from major providers when they introduced a long-running job or function. Managing your own deployments can be far more predictable and progressive, and that's also the main purpose of creating sustainable businesses on the web. Assuming that your traffic or users are in perfect analogy with your income, you can actually invest more money in your infrastructure needs.
+
+### It's Versatile.
+
+Since we have talked about the economics around bringing your own cloud, there is also a counterargument that comes up most of the time: Using AWS/GCP/you-name-it is a rigid and battle-tested platform. That might be true in most cases; still, you have to build your web applications around the ecosystem of the provider, which can be be quite restraining. Even when we are talking about Vercel, Netlify or Cloudflare, you have to shape your code, your architecture, and even your deployment decisions around the caveats and the ecosystem provided by your provider.
+
+On the other hand, a solid deployment solution using an industry standard, like deploying a Docker image, is so versatile and, at some point, a no-brainer. In the long run, if for some reason you are not satisfied with your provider, moving along to another provider requires minimal effort. You can even bring up a "multicloud" architecture where you use different cloud providers, actually reducing the cost more and increasing the availability of your system.
+
+
+### It's Privacy First.
+
+Privacy might not be the first priority for most companies or solo developer, but it can also be quite a deal-breaker. When we started building Proxima, our business model required us to avoid overseas data transfers for our customers and all the data they were collecting. Thus, we chose to use infrastructure from companies not only physically located in EU soil but also owned by European companies. For that reason, we chose to move along with Bunny, Scaleway, and Hetzner.
+
+### Is It Secure Enough, Though?
+
+Security is a main concern when it comes to deploying web applications. Considering that most of the major providers overpromote their security policies and safeguards, it might sound pretty unsafe rolling your own deployments. Still, we can counter-argue that most hosting providers are certified themselves with well-established web and physical security standards like ISO/IEC 27001. Furthermore, extra security services like the DDoS mitigation service from AWS cost extra and they might add up to your deployment budget.
+
+### You're Helping the Web Move Forward
+
+Once again, this might not be a good argument for most people reading this article and might be a hot take of mine, but monopolies are not moving the industry forward. When an open-source project like Next.js is built around a deployment platform as a service, most of the work invested is actually trying to make money. Web frameworks, especially the most popular ones, should get shaped and move forward by the community. Once again, all the big companies are hosting and heavily investing in the big 4 cloud computing platforms (Azure, AWS, GCP, and Cloudflare).
+
+As a logical assumption, most of these platforms are shaping their strategies around the needs and the investment of their bigger customers, and most of the time, your infrastructure needs won't be the same as the ones that a Fortune 500 company has. That's why these platforms tend to be so bloated for the common user and that's also why probably if someone has to deploy a service to AWS, it's almost certain that they might need to hire "AWS expert." Complexity and corporate bureaucracy have created a whole new industry.
+
+Finally, we could also argue that since even for a small project, the bill can get up to a few thousand dollars per month, an equal distribution to the smaller hosting companies can push forward better services and a more flexible and sustainable ecosystem.
+
+## You Can Get as Complex as You Want
+
+Developers tend to be attracted to complexity like moths to flames. It requires lots of effort to keep a system, and especially a deployment infrastructure, lean, well-documented, and established in a way that makes sense, especially as it evolves over time. In a nutshell, you don't have to overcomplicate your infrastructure setup from day one. As you get more users, you might need to reconsider your needs and your deployment and scalability strategy.
+
+On the other hand, it's hardly unlikely to build an application that's super trivial to deploy, the "Hello world" applications are for demo purposes only. Using an architecture that progressively grows with your user base and effectively with your revenue stream can actually grow in a linear and projectable fashion.
+
+## Ok, What's the Catch?
+There isn't any, actually. I am not trying to sell you anything like a course, nor promoting one hosting provider or a framework over another. While I think a self-deployment platform can be quite an investment, especially for small teams or products that are starting now, it might not be a viable solution for everyone, and that's totally fine.
+
+It can get quite tricky to work along with systems, infrastructure, security and networking. It requires lots of reading, experimenting, asking hard questions, spending money, and time. But in the long run, I truly believe that it's a good investment for your business and your products.
+
+But all in all, this direction might not be the good fit at all, especially if you're lacking resources.
+Some teams can't afford spending too many resources on DevOps and system management, and that's totally acceptable. Use whatever tool, methodology, architecture, and act with whatever makes sense for you at the time being; just make sure you're aware of all the options available in the wild.
+
+## Moving Along
+In this first part of our series, I've tried to sum up the good and not-so-good aspects of setting up your own web applications without sacrificing quality and staying within budget.
+
+In the upcoming episodes, we'll break down the costs of our setup, find the best tools for each job, and kick off our deployment plan based on our userbase.
+
+
+
+
