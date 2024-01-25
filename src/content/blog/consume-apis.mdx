@@ -1,0 +1,417 @@
+---
+pubDate: Jan 25 2024
+title: How to Automatically Consume RESTful APIs in Your Frontend
+status: published
+heroImage: '/imgs/cables-wiring.jpg'
+imgCredits: {
+    username: 'Fejuz',
+    url: 'https://unsplash.com/@fejuz'
+}
+categories:
+  - javascript
+  - devops
+  - systems
+description: Learn how to consume RESTful APIs with React, Vue and Svelte.
+---
+
+<Note>The full working code for this tutorial is available on [GitHub](https://github.com/vorillaz/react-openapi-swr).</Note>
+
+## The Problem.
+One of the tasks that I've worked on extensively in the past is designing, developing, deploying, and finally consuming numerous RESTful APIs, and I can tell you, this is one of the hardest tasks a web developer has to deal with. 
+
+## Well, REST is Painful.
+I wouldn't complain, argue, or compare the pros and cons of RESTful APIs in this article, but I can tell you that a REST API can be really painful. We have to tackle a lot of tricky points like:
+
+### API changes.
+When something changes in the backend, the frontend always has to keep everything in sync. A simple change in the API call site or the returned payload can cause the frontend to break, and unit testing it is almost impossible to catch any bugs associated with the contract between the two.
+
+```javascript title="users.js" ins={9-12}
+app.post(
+  "/create",
+  {
+    schema: {
+      body: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          // This parameter addition will break the frontend.
+          surname: { type: "string" },
+        },
+        required: ["name", "surname"],
+      },
+    },
+  },
+  (request, reply) => {
+    reply.send({ data }); 
+  }
+);
+```
+
+### Documentation.
+Offering detailed documentation for each endpoint in our APIs is a common and always a good practice, although this task can be quite tedious and time-consuming to maintain. We have to keep the documentation in sync with the actual code changes. Way too often, the documentation is outdated, and it doesn't reflect the actual API contract, leading to confusion and bugs.
+
+### Type Safety
+When consuming APIs in the frontend, we have to be extremely careful about the data types we are receiving and sending over the wire. Type safety is imperative in the frontend, both for calling the API and for rendering the data.
+
+### API Consumption
+RESTful APIs often involve a significant amount of boilerplate code. We must address tasks such as calling the API, handling responses, managing errors, and more. Even with the help of libraries like `axios`, `SWR`, and `TanStack Query`, we still require a custom abstraction layer to simplify client's calls. However, as the API grows, the abstraction layer will become more complex and challenging to maintain.
+
+```tsx title="api.tsx" 
+// Using SWR to fetch the data for each endpoint
+import useSWR from 'swr'
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+// Using SWR to fetch the data for users.
+export const useUsers = () => {
+  const { data, error } = useSWR("/api/users", fetcher);
+  return {
+    users: data,
+    isLoading: !error && !data,
+    isError: error,
+  };
+};
+// More API calls...
+export const useArticles = () => {};
+export const useProjects = () => {};
+```
+
+
+## GraphQL or tRPC to the Rescue?
+Both GraphQL and tRPC offer excellent alternatives to RESTful APIs, providing lots of benefits and effectively addressing many of the challenges associated with "traditional" REST. However, what if we can't "technically" afford using them?
+
+Both of these solutions require learning a new syntax and a new way of thinking, effectively adding complexity to our stack. 
+Additionally, particularly with tRPC, it is tightly integrated with the Node.js ecosystem and is not available for other languages like Python, Ruby, or Go.  This limitation can be problematic, especially when a Node.js backend API isn't always a viable option. 
+
+So, given these constraints, what alternatives do we have?
+
+
+
+## Swagger and OpenAPI.
+In order to automatically connect our frontend code with our backend APIs, we need to establish a common language between the two. Our backend APIs must be documented in a way that our frontend can understand and consume, and this is where Swagger and OpenAPI come into play.
+
+[Swagger](https://swagger.io/) is an open-source software framework that implements the [OpenAPI](https://www.openapis.org/) Specification—an API description format for REST APIs. The OpenAPI Specification defines a standard, language-agnostic interface to HTTP APIs, enabling both humans and computers to discover and understand the capabilities of the API. 
+
+Using the specification, we can describe our API's parameters, responses, errors, and document evertyhing, all in one place, all through our codebase.
+
+## Building the API.
+
+In order to demonstrate how to automatically generate a client SDK in the frontend, we will develop a dead simple API. We will use [fastify](https://www.fastify.io/), but you can choose any framework you prefer. Swagger and OpenAPI are baked by a really active community, and there are numerous [integrations](https://swagger.io/tools/open-source/open-source-integrations/) available for most popular frameworks and languages.
+
+We can start by installing the required dependencies for our backend.
+
+```bash
+❏ ~ npm i fastify fastify-swagger @fastify/swagger-ui
+```
+
+Then we are going to create a simple `fastify` instance, attach the `fastify-swagger` and `fastify-swagger-ui` modules as plugins, and configure the OpenAPI specification metadata.
+
+```typescript title="server.ts"
+import fastify from "fastify";
+import ui from "@fastify/swagger-ui";
+
+const start = async () => {
+  const server = fastify();
+  await server.register(swagger, {
+    openapi: {
+      info: {
+        title: 'Test OpenAPI',
+        description: 'How cool is that?',
+        version: '0.1.0',
+      },
+      servers: [
+        {
+          url: 'http://localhost:3000',
+          description: 'Development server',
+        },
+      ],
+    },
+  });
+  await server.register(ui, {});
+
+  server.listen({ port: 3001 }, (err, address) => {
+    onsole.log(`Server listening at ${address}`);
+  });
+};
+
+start();
+```
+
+Now, we can start our server and visit the Swagger UI at http://localhost:port/documentation. The documentation will be empty for now, but we will add our endpoints later on. You can also have a look at how the Swagger UI looks in the Swagger's online [demo](https://petstore.swagger.io/).
+
+Finally, upon starting the server in development mode, we will export the OpenAPI specification in JSON format, save it in a local file called `openapi.json` and we are almost done with our backend setup.
+
+```typescript title="server.ts" {8-9}
+if (process.env.NODE_ENV === "development") {
+  const spec = "./openapi/openapi.json";
+  const specFile = path.join(__dirname, spec);
+  server.ready(() => {
+    const apiSpec = JSON.stringify(server.swagger() || {}, null, 2);
+
+    writeFile(specFile, apiSpec).then(() => {
+      console.log(`Swagger specification file write to ${spec}`);
+    });
+  });
+}
+```
+
+This `openapi.json` specification file can be safely sourced and committed to our repository, and it will be used by our frontend to autodiscover the API and consume it.
+
+In the meantime, we are going to expand our backend with two endpoints: one for fetching data and another one for creating data. 
+Fastify provides out-of-the-box support for API serialization and validation through its [schema-based approach](https://www.fastify.io/docs/latest/Validation-and-Serialization/) built on top of [JSON Schema](https://json-schema.org/). 
+Through the `schema` option, we can attach a schema definition to each route.
+
+```typescript title="api.ts" 
+const retrieveSchema = {
+  response: {
+    200: {
+      type: "object",
+      properties: {
+        data: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              id: { type: "number" },
+              name: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+const createSchema = {
+  body: {
+    type: "object",
+    properties: {
+      name: { type: "string" },
+    },
+    required: ["name"],
+  },
+  response: {
+    200: {
+      type: "object",
+      properties: {
+        data: {
+          type: "object",
+          properties: {
+            id: { type: "number" },
+            name: { type: "string" },
+          },
+        },
+      },
+    },
+  },
+};
+
+const data = [
+  { id: 1, name: "John" },
+  { id: 2, name: "Jane" },
+  { id: 3, name: "Jack" },
+];
+
+app.post("/users", { schema: createSchema }, (request, reply) => {
+  reply.send({ users: data });
+});
+
+app.get("/users", { schema: retrieveSchema }, (request, reply) => {
+  reply.send({ users: data });
+});
+```
+
+The code above, defines two `users` endpoints, one for creating a user and another one for retrieving all the available users in our system.
+The `retrieveSchema` definition will validate the response and the `createSchema` will serialize and validate the request and the response. We can also add an `operationId` and additional tags to our endpoints, making them more descriptive and reference them later on when building the API client.
+
+```typescript title="api.ts" {2-3, 8-9}
+const retrieveSchema = {
+  operationId: "retrieveUsers",
+  tags: ["users"],
+  // ...
+};
+
+const createSchema = {
+  operationId: "createUser",
+  tags: ["users"],
+  // ...
+};
+```
+
+Finally, as we're shaping our API, we can see that the output at t`openapi/openapi.json` is also changing, reflecting the updates we make to the endpoints' schema definitions. We can also add additional information to each route, such as a description, a summary, or example values, according to the [specification](https://swagger.io/specification/).
+
+## Consuming the API.
+
+Now, it's time to consume our API. We'll use [React](https://reactjs.org/) for this tutorail, but feel free to use any other framework you prefer; the process remains the same. Additionally, we'll utilize [SWR](https://swr.vercel.app/) to fetch data from the API and TypeScript to ensure type safety.
+
+## Generating the API Client.
+In order to generate the API client, there are a few options available, but we are going to use (Orval)[https://orval.dev]. Orval is a CLI tool that generates API clients based on an OpenAPI specification. It supports TypeScript, JavaScript, Axios, React, Vue, Angular and Svelte and it's highly customizable.
+
+As an alternative, you can also use the official [OpenAPI Generator](https://openapi-generator.tech/), which is a more generic tool supporting a wide range of languages and frameworks.
+
+## Installing and Using `orval`.
+In our frontend codebase, we will install `orval` using the following command:
+
+```bash
+❏ ~ npm i -D orval
+```
+
+Up next, we will create a configuration file called `orval.config.js` in the root of our project and add the following configuration:
+
+```javascript title="orval.config.js"
+const path = require("path");
+
+const input = path.join(__dirname, "server", "openapi", "openapi.json");
+const output = path.resolve(__dirname, "client", "src", "sdk");
+
+module.exports = {
+  sdk: {
+    output: {
+      clean: true,
+      prettier: true,
+      mode: "tags-split",
+      target: path.join(output, "api"),
+      schemas: path.join(output, "schemas"),
+      client: "swr",
+      // ... more opts
+    },
+    input: {
+      target: input,
+    },
+  },
+};
+```
+
+Orval supports splitting the generated code into multiple files, organized by the tags we have defined earlier in our schema definitions. Additionally, we will need to configure the input and output paths for the generated API client, as well as the framework we want to use. In our case, we will use the `SWR` client for React.
+
+Then, we will add a script in our `package.json` file to generate the API client and we are ready to go.
+
+```json title="package.json" {5}
+{
+  "scripts": {
+    "generate:api": "orval"
+  }
+}
+```
+
+Running `npm run generate:api` from the command line will generate the client SDK in the `client/src/sdk` folder.
+
+## Working with the SDK.
+The autogenerated API client will contain all the endpoints we have declared in our OpenAPI specification, the `createUser` and `retrieveUsers` endpoints in our case, as they were defined through the `createSchema` and `retrieveSchema` definitions. 
+
+Orval wraps the API calls in a custom hook that we can then import and use to fetch the data. The hook returns the `users`, the `isLoading` and `isError` flags, and it also provides type safety for the data we are receiving over the network.
+
+
+
+```tsx title="Users.tsx"
+// Importing the generated API client
+import { useUsers } from "sdk/api/users";
+
+export const Users = () => {
+  const { users, isLoading, isError } = useUsers();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error...</div>;
+  }
+
+  return (
+    <ul>
+      {users?.map((user) => (
+        <li key={user.id}>{user.name}</li>
+      ))}
+    </ul>
+  );
+};
+```
+
+Up next, we will also import the `createUser` function which calls the `POST /users` endpoint, once again the name of the function is based on the `operationId` we have defined in the `createSchema` definition. 
+Keep in mind that the passed parameters are type safe and the function will throw an error if we pass an invalid payload.
+
+```tsx title="Users.tsx" {1-2, 8-9}
+import { useUsers, createUser } from "sdk/api/users";
+
+export const Users = () => {
+  const { users, isLoading, isError } = useUsers();
+  const handleCreateUser = () => {
+    createUser({ name: "John" });
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error...</div>;
+  }
+
+  return (
+    <div>
+      <button onClick={handleCreateUser}>Create User</button>
+      <ul>
+        {users?.map((user) => (
+          <li key={user.id}>{user.name}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+```
+
+## Testing the Client.
+With orval, we can also integrate the API client in our unit tests. Orval provides first class support for mocking through the (Mock Service Worker)[https://mswjs.io/] library, and it can automatically generate the MSW handlers for testing server. 
+
+Setting up the handlers is fairly simple, we just need to import the `getUsersMSW` autogenerated function from the API client and pass it to the `setupServer` function from MSW.
+
+```javascript title="setupTests.ts"
+import { setupServer } from 'msw/node';
+import { getUsersMSW } from 'sdk/api/users/users.msw';
+export const server = setupServer(...getUsersMSW());
+```
+
+Then we can import and use the mocking `server` instance in our tests.
+
+```javascript title="Users.test.tsx"
+import { render, screen } from '@testing-library/react';
+import { server } from 'setupTests';
+import { Users } from './Users';
+
+describe('Users', () => {
+  beforeAll(() => server.listen());
+  afterEach(() => server.resetHandlers());
+  afterAll(() => server.close());
+
+  it('should render the users', async () => {
+    render(<Users />);
+    expect(await screen.findByText('John')).toBeInTheDocument();
+  });
+});
+```
+
+## Isomorphic Data Validation.
+Since the OpenAPI specification is language-agnostic, we can use the output to validate data in both our frontend and backend. This approach makes total sense since we can provide uniform validation rules on both sides of our stack. There are a few libraries out there that can help us with this task, such as [typed-openapi](https://github.com/astahmer/typed-openapi) or [openapi-zod-client](https://github.com/astahmer/openapi-zod-client), which can take an OpenAPI definition as an input and transform it to `zod` schema definitons.
+
+## Automating the SDK Generation.
+Our backend and frontend code might not be in the same repository, thus we need a way to automatically detect any specification changes and sync the client SDK. This can be easily achieved by using a CI/CD pipeline. We can integrate GitHub actions, triggered by any backend code commited, to produce the client SDK and commit it to our frontend repository.
+
+Furthermore, since we can split the generated code into multiple parts based on tag filtering, we can also create different SDKs from different resources or even publicly available APIs. There is an extensive list of publicly available OpenAPI specifications on [SwaggerHub](https://app.swaggerhub.com/search), [RapidAPI](https://rapidapi.com/) and [APIs.guru](https://apis.guru/).
+
+## Running the Client without Any Backend.
+Since the OpenAPI can effectively describe our resources, we can reuse it to generate a dummy server that can be later used for development and testing purposes without bootstrapping any actual services. There some tools available that can help us with this task, such as [Prism](https://stoplight.io/open-source/prism/), [OpenAPI Mock](https://github.com/muonsoft/openapi-mock), [OpenAPI Backend](https://www.npmjs.com/package/openapi-backend) and the MSW library we have already seen.
+
+Additionally, using the [OpenAPI Generator](https://openapi-generator.tech/docs/generators#server-generators) we can spawn a fully functional backend in a few seconds from a given specification.
+
+```bash
+# Generate a php laravel server
+❏ ~ npx @openapitools/openapi-generator-cli generate -i ./openapi/openapi.json -g php-laravel -o ./server
+
+# Or a nodejs express server
+❏ ~ npx @openapitools/openapi-generator-cli generate -i ./openapi.yaml -g nodejs-express-server -o ./another-server
+```
+
+
+## Conclusion.
+In this article, we've explored automating the consumption of RESTful APIs in our frontend using Swagger and OpenAPI. Working with a stack of widely available tools, we can significantly reduce the boilerplate code, improve code efficiency, and cut down the time spent on API development. A streamlined API development process between the frontend and backend teams can also lead to better communication and collaboration between the two, and ultimately, to better code and product quality.
+
