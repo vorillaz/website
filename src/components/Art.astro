@@ -16,16 +16,12 @@ const updatedstr = updatedDate?.toISOString();
 ---
 
 <PostLayout title={title}>
-  <article
-    id="article"
-    role="article"
-    class="prose lg:prose-xl dark:prose-dark min-w-full"
-  >
-    <h1 transition:name={slugify(title)} class="post-title">{title}</h1>
+  <article id="article" role="article" class="">
+    <h1 transition:name={slugify(title)} class="">{title}</h1>
     <!-- Date and time -->
-    <p class="text-sm text-gray-500 dark:text-gray-400">
+    <p class="">
       Published on{" "}
-      <time datetime={pubstr} class="font-medium">
+      <time datetime={pubstr} class="">
         {
           new Date(pubDate).toLocaleDateString("en-US", {
             year: "numeric",
@@ -39,7 +35,7 @@ const updatedstr = updatedDate?.toISOString();
           <>
             {" "}
             &middot; Updated on{" "}
-            <time datetime={updatedstr} class="font-medium">
+            <time datetime={updatedstr} class="">
               {new Date(updatedDate).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "long",
@@ -53,7 +49,7 @@ const updatedstr = updatedDate?.toISOString();
       <>
         {
           heroImage && (
-            <div class="flex justify-center">
+            <div class="">
               <Image
                 src={heroImage}
                 width={812}
@@ -61,7 +57,7 @@ const updatedstr = updatedDate?.toISOString();
                 quality={100}
                 format="jpg"
                 loading="eager"
-                class="rounded-md w-auto my-8 object-cover"
+                class=""
                 alt={`img of ${title}`}
               />
             </div>

@@ -14,31 +14,29 @@ const title = currentPage < 2 ? "Writing." : `Writing. - Page ${currentPage}`;
 ---
 
 <PostLayout title={title}>
-  <div class="container flex flex-col max-w-[64rem] mb-10">
-    <h1 class="mb-10">
-      <span class="text-4xl font-bold">Writing.</span>
-    </h1>
+  <div>
+    <h1 class="mb">Writing.</h1>
 
-    <ul class="flex flex-col gap-7">
+    <ul class="flex flex-column gap-2 no-list">
       {
         paginatedPosts.map(({ data, slug }) => (
-          <li>
-            <a href={`/${slug}`}>
-              <span class="flex place-content-between  gap-10">
-                <span class="flex flex-col gap-2">
-                  <span>{data.title}</span>
+          <li class="flex gap-half flex-column">
+            <div class="flex space-between align-top gap-1">
+              <a href={`/${slug}`}>
+                <span>
+                  <span>
+                    <span>{data.title}</span>
+                  </span>
                 </span>
-                <time class="opacity-50 text-sm date text-right">
-                  {toDateString(data.pubDate)}
-                </time>
-              </span>
-            </a>
-            <div class="opacity-50 max-w-lg mt-1">{data.description}</div>
+              </a>
+              <time class="date">{toDateString(data.pubDate)}</time>
+            </div>
+            <div class="small-text">{data.description}</div>
           </li>
         ))
       }
     </ul>
-    <div>
+    <div class="mt-2">
       <Pagination
         {currentPage}
         {totalPages}

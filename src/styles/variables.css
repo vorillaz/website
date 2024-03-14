@@ -1,0 +1,35 @@
+:root {
+  --gap: 14px;
+  --font-small: 14px;
+  --width: 700px;
+  --border: 1.5px;
+  --radius: 4px;
+  --logo: #000;
+  --faded-text: rgba(0, 0, 0, 0.4);
+  --faded-line: rgba(0, 0, 0, 0.2);
+  --faded-bg: rgba(0, 0, 0, 0.06);
+}
+
+.light {
+  --text: rgb(33, 33, 33);
+  --bg: #EDEDED; 
+  --color: 240, 240, 240;
+  --faded-text: rgba(33, 33, 33, 0.4);
+  --faded-line: rgba(33, 33, 33, 0.2);
+  --faded-bg: rgba(33, 33, 33, 0.06);
+}
+
+/* Themes */
+.dark {
+  --bg: #18181a;
+  --text: rgb(243, 244, 246);
+  --logo: rgb(243, 244, 246);
+  --faded-text: rgba(243, 244, 246, 0.4);
+  --faded-line: rgba(243, 244, 246, 0.2);
+  --faded-bg: rgba(243, 244, 246, 0.06);
+
+}
+.js{
+  --text: #000;
+  --bg: #fddb29; /* e9d134 */
+}

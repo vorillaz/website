@@ -1,0 +1,94 @@
+body {
+  margin: 50px 0;
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+html {
+  -moz-text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}
+
+body {
+  font: 18px/1.5 "IBM Plex Sans", sans-serif;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Helpers */
+/* Flex */
+.flex {
+  display: flex;
+}
+.flex-column {
+  flex-direction: column;
+}
+.flex-center {
+  align-items: center;
+}
+
+.align-top {
+  align-items: flex-start;
+}
+
+.align-bottom {
+  align-items: flex-end;
+}
+
+.center {
+  align-items: center;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.space-between {
+  justify-content: space-between;
+}
+
+.mt {
+  margin-top: var(--gap);
+}
+
+.mt-2 {
+  margin-top: calc(var(--gap) * 2);
+}
+.mb {
+  margin-bottom: var(--gap);
+}
+
+.gap-half {
+  gap: calc(var(--gap) / 2);
+}
+
+.gap-1 {
+  gap: var(--gap);
+}
+
+
+.gap-2 {
+  gap: calc(var(--gap) * 2);
+}
+
+.no-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Borders and coloring */
+.top-border {
+  border-top: var(--border) solid var(--faded-line);
+  padding-top: var(--gap);
+}
+
+.no-border {
+  border: none;
+}
+
+.faded {
+  color: var(--faded-text);
+}

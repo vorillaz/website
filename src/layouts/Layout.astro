@@ -1,6 +1,7 @@
 ---
-import { ViewTransitions } from "astro:transitions";
+import "../styles/refined.css";
 
+import { ViewTransitions } from "astro:transitions";
 interface Props {
   title: string;
   description?: string;
@@ -77,15 +78,16 @@ const prefixedTitle = title ? `${title} | vorillaz.com` : "vorillaz.com";
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net" />
     <link
-      href="https://fonts.bunny.net/css?family=inter:200,300,400,500,600,700,800,900|jetbrains-mono:400,400i"
+      href="https://fonts.bunny.net/css?family=ibm-plex-sans:400,400i,500i,600|jetbrains-mono:400,400i"
       rel="stylesheet"
     />
     <title>{prefixedTitle}</title>
     <ViewTransitions />
   </head>
   <body>
-    <div class="mx-auto max-w-4xl px-4 md:px-0">
+    <div class="page">
       <slot />
     </div>
+    <script src="../scripts/theme.ts"></script>
   </body>
 </html>
