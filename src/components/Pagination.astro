@@ -22,12 +22,12 @@ const next = currentPage < totalPages ? "" : "disabled";
             href={prevUrl}
             aria-label="Previous"
           >
-            Previous
+            <span>Previous</span>
           </a>
         }
         {currentPage} / {totalPages}
         <a aria-disabled={next === "disabled"} href={nextUrl} aria-label="Next">
-          Next
+          <span>Next</span>
         </a>
       </nav>
     )

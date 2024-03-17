@@ -103,7 +103,7 @@ In order to demonstrate how to automatically generate a client SDK in the fronte
 We can start by installing the required dependencies for our backend.
 
 ```bash
-❏ npm i fastify fastify-swagger @fastify/swagger-ui
+npm i fastify fastify-swagger @fastify/swagger-ui
 ```
 
 Then we are going to create a simple `fastify` instance, attach the `fastify-swagger` and `fastify-swagger-ui` modules as plugins, and configure the OpenAPI specification metadata.
@@ -255,7 +255,7 @@ As an alternative, you can also use the official [OpenAPI Generator](https://ope
 In our frontend codebase, we will install `orval` using the following command:
 
 ```bash
-❏ npm i -D orval
+npm i -D orval
 ```
 
 Up next, we will create a configuration file called `orval.config.js` in the root of our project and add the following configuration:
@@ -408,10 +408,10 @@ Additionally, using the [OpenAPI Generator](https://openapi-generator.tech/docs/
 
 ```bash
 # Generate a php laravel server
-❏ npx @openapitools/openapi-generator-cli generate -i ./openapi/openapi.json -g php-laravel -o ./server
+npx @openapitools/openapi-generator-cli generate -i ./openapi/openapi.json -g php-laravel -o ./server
 
 # Or a nodejs express server
-❏ npx @openapitools/openapi-generator-cli generate -i ./openapi.yaml -g nodejs-express-server -o ./another-server
+npx @openapitools/openapi-generator-cli generate -i ./openapi.yaml -g nodejs-express-server -o ./another-server
 ```
 
 

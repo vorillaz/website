@@ -15,6 +15,7 @@ export default defineConfig({
     rehypePlugins,
     remarkPlugins,
   },
+
   integrations: [mdx(), react(), sitemap()],
   vite: {
     optimizeDeps: {

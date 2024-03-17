@@ -23,11 +23,7 @@ const title = currentPage < 2 ? "Writing." : `Writing. - Page ${currentPage}`;
           <li class="flex gap-half flex-column">
             <div class="flex space-between align-top gap-1">
               <a href={`/${slug}`}>
-                <span>
-                  <span>
-                    <span>{data.title}</span>
-                  </span>
-                </span>
+                <span>{data.title}</span>
               </a>
               <time class="date">{toDateString(data.pubDate)}</time>
             </div>

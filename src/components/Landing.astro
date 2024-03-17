@@ -1,12 +1,21 @@
-<div class="flex">
+---
+import Playing from "./Playing.astro";
+---
+
+<div class="wrap">
   <div>
-    <h1>
+    <span class="as-h1 as-header">
       Hello there.
       <br />
       <span class="faded">
-        You've reached the personal website of
-        <span class="highlight">Theodore.</span>
+        You've reached my personal corner of the internet.
+        <span class="text-text">
+          My name is Theodore and you can learn more <a href="/about"
+            ><span>about me</span></a
+          >.</span
+        >✦ →
+        <Playing />
       </span>
-    </h1>
+    </span>
   </div>
 </div>

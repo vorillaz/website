@@ -15,8 +15,6 @@
 /* Typography */
 @import url("./typography.css");
 
-/* Helpers */
-/* Menu */
-/* Footer */
-/* About */
-/* Writing */
+/* Code */
+@import url("./code.css");
+

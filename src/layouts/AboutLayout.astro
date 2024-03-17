@@ -15,9 +15,8 @@ const { frontmatter } = Astro.props;
 <Layout title={`${frontmatter.title}`}>
   <Header />
   <main class="wrap">
-    <div class="">
+    <div class="content">
       <slot />
     </div>
   </main>
-  <Footer />
 </Layout>

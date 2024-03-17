@@ -11,11 +11,13 @@ import {
 } from "shikiji-transformers";
 import { createCssVariablesTheme } from "shikiji";
 import { codeBlock } from "./code";
+import { wrapLinkContent } from "./link";
 
 export const remarkPlugins: RemarkPlugins = [codeBlock];
 
 export const rehypePlugins: RehypePlugins = [
   [rehypeExternalLinks, { target: "_blank", rel: "noopener noreferrer" }],
+  wrapLinkContent,
   [
     rehypePrettyCode,
     {
@@ -23,7 +25,7 @@ export const rehypePlugins: RehypePlugins = [
         name: "css-variables",
         variablePrefix: "--shiki-",
       }),
-      keepBackground: false,
+      keepBackground: true,
       transformers: [
         transformerNotationDiff(),
         transformerMetaWordHighlight(),

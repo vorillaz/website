@@ -1,0 +1,13 @@
+---
+const response = await fetch(Astro.url + "/api/spotify");
+const data = await response.json();
+const { isPlaying, title, artist } = data;
+---
+
+{
+  isPlaying && (
+    <span>
+      Now listening to: {title} by {artist}
+    </span>
+  )
+}
