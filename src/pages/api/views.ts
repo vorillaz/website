@@ -13,7 +13,7 @@ export const GET: APIRoute = async ({ request }) => {
 
   let item;
   try {
-    const views = await db
+    await db
       .select({
         count: Views.count,
       })
