@@ -19,6 +19,9 @@ body {
 
 /* Helpers */
 /* Flex */
+.flex-wrap {
+  flex-wrap: wrap;
+}
 .flex {
   display: flex;
 }
@@ -183,34 +186,3 @@ template {
 }
 
 
-/* Breakpoint */
-
-/* Small only */
-@media (max-width: 500px) {
-  
-  .post-info.sm-ml-0,
-  .sm-ml-0 {
-    margin-left: 0;
-  }
-  .sm-hide{
-    display: none !important;
-  }
-  .sm-flex-column {
-    flex-direction: column;
-  }
-  .sm-only-gap-0 {
-    gap: 0;
-  }
-  .sm-only-gap-fifth {
-    gap: calc(var(--gap) /5);
-  }
-  .sm-only-gap-1 {
-    gap: calc(var(--gap));
-  }
-  .sm-justify-space-around {
-    justify-content: space-around;
-  }
-  .sm-align-baseline {
-    align-items: baseline;
-  }
-}
