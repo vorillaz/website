@@ -36,6 +36,17 @@ export async function getStaticPaths() {
 const { post, generative } = Astro.props;
 ---
 
-{post && <Post post={post} />}
-
-{generative && <Art post={generative} />}
+{
+  post && (
+    <>
+      <Post post={post} />
+    </>
+  )
+}
+{
+  generative && (
+    <>
+      <Art post={generative} />
+    </>
+  )
+}
