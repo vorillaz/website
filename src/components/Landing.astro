@@ -1,21 +1,43 @@
 ---
-import Playing from "./Playing.astro";
+import LatestPost from "./LatestPost.astro";
+import Playing from "./Playing.svelte";
 ---
 
 <div class="wrap">
   <div>
     <span class="as-h1 as-header">
-      Hello there.
+      Hello, I am <a class="big-link" href="/about">Theodore.</a>
       <br />
       <span class="faded">
-        You've reached my personal corner of the internet.
-        <span class="text-text">
-          My name is Theodore and you can learn more <a href="/about"
-            ><span>about me</span></a
-          >.</span
-        >✦ →
-        <Playing />
+        an independent software engineer and a tech enthusiast from Greece.
+      </span>
+      <br />
+      <span class="faded">
+        Currently building <a class="big-link" href="https://proxima.so">
+          Proxima Analytics.
+        </a>
+      </span>
+      <span class="faded">
+        I also like <a class="big-link" href="/posts">to write</a> about software
+        and try to create <a class="big-link" href="/projects">some stuff</a> for
+        the web.
       </span>
     </span>
+    <span class="as-h1 as-header faded">
+      Occassionally I travel and <a class="big-link" href="/talks">speak</a> at conferences.
+    </span>
+    <h2 class="faded relaxed">
+      <LatestPost />
+    </h2>
+    <h2 class="faded relaxed">
+      <Playing client:only />
+    </h2>
   </div>
 </div>
+
+<style>
+  /* tiny override */
+  h2 + h2 {
+    margin-top: calc(var(--gap));
+  }
+</style>

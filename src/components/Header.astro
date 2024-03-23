@@ -22,13 +22,13 @@ const { pathname } = url;
         <a href="/about"><span>About</span></a>
       </li>
       <li class={isSelected(pathname === "/posts" || isPost)}>
-        <a href="/posts"><span>Writing</span></a>
-      </li>
-      <li class={isSelected(pathname === "/talks")}>
-        <a href="/talks"><span>Talks</span></a>
+        <a href="/posts"><span>Blog</span></a>
       </li>
       <li class={isSelected(pathname === "/projects")}>
         <a href="/projects"><span>Projects</span></a>
+      </li>
+      <li class={isSelected(pathname === "/talks")}>
+        <a href="/talks"><span>Speaking</span></a>
       </li>
     </ul>
   </div>

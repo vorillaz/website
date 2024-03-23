@@ -2,45 +2,59 @@
 import type { CollectionEntry } from "astro:content";
 import PostLayout from "@/layouts/PostLayout.astro";
 import Pagination from "./Pagination.astro";
-import { toDateString } from "@/lib/date";
+import { toShortDateString } from "@/lib/date";
+import PostViews from "./PostViews.astro";
 
 export interface Props {
-  currentPage: number;
-  totalPages: number;
-  paginatedPosts: CollectionEntry<"blog">[];
+  title?: string;
+  currentPage?: number;
+  totalPages?: number;
+  isPosts?: boolean;
+  paginatedPosts: CollectionEntry<"blog">[] | CollectionEntry<"generative">[];
 }
-const { currentPage, totalPages, paginatedPosts } = Astro.props;
-const title = currentPage < 2 ? "Writing." : `Writing. - Page ${currentPage}`;
+const { currentPage, totalPages, paginatedPosts, title: t } = Astro.props;
+const title = t
+  ? t
+  : currentPage && currentPage < 2
+    ? "Writing."
+    : `Writing. - Page ${currentPage}`;
+const heading = t ? t : "Writing.";
 ---
 
 <PostLayout title={title}>
   <div>
-    <h1 class="mb">Writing.</h1>
+    <h1 class="mb-2">{heading}</h1>
 
-    <ul class="flex flex-column gap-2 no-list">
+    <ul class="flex flex-column gap-2 no-list sm-only-gap-1">
       {
         paginatedPosts.map(({ data, slug }) => (
           <li class="flex gap-half flex-column">
-            <div class="flex space-between align-top gap-1">
-              <a href={`/${slug}`}>
+            <div class="flex space-between align-top gap-1 sm-flex-column sm-only-gap-fifth">
+              <a href={`/${slug}`} data-astro-prefetch>
                 <span>{data.title}</span>
               </a>
-              <time class="date">{toDateString(data.pubDate)}</time>
+              <time class="post-info sm-ml-0">
+                {toShortDateString(data.pubDate)}
+              </time>
             </div>
-            <div class="small-text">{data.description}</div>
+            <div class="small-text sm-hide">{data.description}</div>
           </li>
         ))
       }
     </ul>
-    <div class="mt-2">
-      <Pagination
-        {currentPage}
-        {totalPages}
-        prevUrl={`/posts${
-          currentPage - 1 !== 1 ? "/" + (currentPage - 1) : ""
-        }`}
-        nextUrl={`/posts/${currentPage + 1}`}
-      />
-    </div>
+    {
+      currentPage && totalPages && (
+        <div class="mt-2">
+          <Pagination
+            {currentPage}
+            {totalPages}
+            prevUrl={`/posts${
+              currentPage - 1 !== 1 ? "/" + (currentPage - 1) : ""
+            }`}
+            nextUrl={`/posts/${currentPage + 1}`}
+          />
+        </div>
+      )
+    }
   </div>
 </PostLayout>

@@ -1,0 +1,75 @@
+---
+import Go from "./icons/Go.astro";
+import Js from "./icons/Jss.astro";
+import Ts from "./icons/Ts.astro";
+import Vue from "./icons/Vue.astro";
+import React from "./icons/React.astro";
+import Svelte from "./icons/Svelte.astro";
+import Json from "./icons/Json.astro";
+import Dots from "./icons/Dots.astro";
+import Docker from "./icons/Docker.astro";
+import AstroIcon from "./icons/Astro.astro";
+import Sql from "./icons/Sql.astro";
+
+import Copy from "./icons/Copy.astro";
+import Check from "./icons/Check.astro";
+
+const props = Astro.props;
+const { lang, langName, code, title } = props;
+
+const getComponent = (lang) => {
+  switch (lang) {
+    case "go":
+      return Go;
+    case "js":
+    case "javascript":
+      return Js;
+    case "json":
+      return Json;
+    case "sql":
+      return Sql;
+    case "astro":
+      return AstroIcon;
+    case "ts":
+    case "typescript":
+      return Ts;
+    case "vue":
+      return Vue;
+    case "react":
+    case "tsx":
+    case "jsx":
+      return React;
+    case "svelte":
+      return Svelte;
+    case "docker":
+      return Docker;
+    case "bash":
+    case "sh":
+    case "shell":
+      return Dots;
+    default:
+      return null;
+  }
+};
+
+const IconLang = getComponent(lang);
+---
+
+<div class="code-header flex space-between center px-1">
+  <div class="code-filename flex center gap-half">
+    <div class="code-icon">
+      {IconLang && <IconLang />}
+    </div>
+    {title && <span class="mono small-text lh-1">{title}</span>}
+  </div>
+  <div class="code-copy">
+    <button class="copy-btn" data-id="cp" data-copy-btn data-code={code}>
+      <span data-id="copy-icon" class="btn-holder btn-icon-copy">
+        <Copy />
+      </span>
+      <span data-id="check-icon" class="btn-holder btn-icon-check">
+        <Check />
+      </span>
+    </button>
+  </div>
+</div>

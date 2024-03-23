@@ -1,0 +1,13 @@
+---
+import { getLatestPost } from "@/lib/posts";
+const post = await getLatestPost();
+const { slug, data } = post;
+---
+
+<span>
+  <span>My latest post is </span>
+  <a class="big-link" href={slug}>{data?.title}</a>
+  and while you're here, you can check some <a class="big-link" href="/art"
+    >visuals.</a
+  >
+</span>

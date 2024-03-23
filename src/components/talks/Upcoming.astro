@@ -1,0 +1,44 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { toDateString } from "@/lib/date";
+interface Props {
+  talks: CollectionEntry<"talks">[];
+}
+const { talks } = Astro.props;
+---
+
+{
+  talks && talks.length > 0 ? (
+    <>
+      <div class="as-h4 as-header mb">Upcoming Talks</div>
+      <div class="upcoming mb-2">
+        <div class="flex flex-column no-list">
+          {talks.map((talk) => (
+            <div class="flex space-between center lined sm-flex-column sm-justify-space-around sm-align-baseline sm-only-gap-fifth">
+              <div>{talk.data.title}</div>
+              <div class="flex center gap-1 center">
+                <span class="flex gap">
+                  <span class="badge">
+                    <a href="https://jsheroes.io/">Tickets</a>
+                  </span>
+                  <span class="badge">{talk.data.lang}</span>
+                </span>
+                <span class="faded small-text">
+                  {toDateString(talk.data.date)}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  ) : null
+}
+
+<style>
+  .upcoming {
+    border-radius: var(--radius);
+    padding: 1rem;
+    border: 1px solid var(--faded-line);
+  }
+</style>

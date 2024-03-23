@@ -4,15 +4,27 @@ import { slugify } from "@/lib/utils";
 import { Image } from "astro:assets";
 import PostLayout from "@/layouts/PostLayout.astro";
 import Note from "./Note.astro";
-import Code from "./Code.astro";
+import Code from "./CodeHeader.astro";
+import PostViews from "./PostViews.astro";
+import InlineCode from "./InlineCode.astro";
+import Prompt from "./Prompt.astro";
 
 export interface Props {
   post: CollectionEntry<"blog">;
 }
 const { post } = Astro.props;
 const { Content } = await post.render();
-const { title, heroImage, imgCredits, pubDate, updatedDate, description } =
-  post.data;
+const {
+  title,
+  heroImage,
+  imgCredits,
+  pubDate,
+  updatedDate,
+  description,
+  categories,
+  prompt,
+  heroImageGenerator,
+} = post.data;
 
 const pubstr = pubDate.toISOString();
 const updatedstr = updatedDate?.toISOString();
@@ -22,21 +34,22 @@ const updatedstr = updatedDate?.toISOString();
   <article id="article" role="article" class="content">
     <h1 transition:name={slugify(title)} class="post-title">{title}</h1>
     <!-- Date and time -->
-    <p class="date">
-      Published on{" "}
-      <time datetime={pubstr}>
-        {
-          new Date(pubDate).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })
-        }
-      </time>
+    <p class="post-info gap-1 full">
+      <span>
+        Published on{" "}
+        <time datetime={pubstr}>
+          {
+            new Date(pubDate).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })
+          }
+        </time>
+      </span>
       {
         updatedDate && (
-          <>
-            {" "}
+          <span>
             &middot; Updated on{" "}
             <time datetime={updatedstr}>
               {new Date(updatedDate).toLocaleDateString("en-US", {
@@ -45,37 +58,60 @@ const updatedstr = updatedDate?.toISOString();
                 day: "numeric",
               })}
             </time>
-          </>
+          </span>
         )
       }
-
-      <>
-        {
-          heroImage && (
-            <figure>
-              <Image
-                src={heroImage}
-                width={1000}
-                height={500}
-                quality={100}
-                format="jpg"
-                loading="eager"
-                alt={`img of ${title}`}
-              />
-              {imgCredits && (
-                <figcaption class="small-text">
-                  Image Credits: {imgCredits.url}
-                </figcaption>
-              )}
-            </figure>
-          )
-        }
-      </>
-      <Content
-        components={{
-          Note,
-        }}
-      />
+      <PostViews slug={post.slug} />
+      {
+        prompt && heroImageGenerator && (
+          <span class="ml-auto">
+            <Prompt heroImageGenerator={heroImageGenerator} prompt={prompt} />
+          </span>
+        )
+      }
     </p>
+    <>
+      {
+        heroImage && (
+          <figure>
+            <Image
+              src={heroImage}
+              width={1000}
+              height={500}
+              quality={100}
+              format="jpg"
+              loading="eager"
+              alt={`img of ${title}`}
+            />
+            {imgCredits && (
+              <figcaption class="small-text">
+                Image Credits: {imgCredits.url}
+              </figcaption>
+            )}
+          </figure>
+        )
+      }
+    </>
+    <Content
+      components={{
+        Note,
+        "custom-code-renderer": Code,
+        "inline-code": InlineCode,
+      }}
+    />
+
+    {
+      categories && categories.length > 0 && (
+        <p class="flex gap-half mt">
+          {categories.map((category) => (
+            <span class="badge bigger">
+              <a href={`/category/${slugify(category)}`} class="category">
+                {category}
+              </a>
+            </span>
+          ))}
+        </p>
+      )
+    }
   </article>
 </PostLayout>
