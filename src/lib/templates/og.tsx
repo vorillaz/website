@@ -1,4 +1,4 @@
-export default ({ title = "Welcome." }: { title: string }) => {
+export default ({ title = "Welcome" }: { title: string }) => {
   return (
     <div
       style={{
