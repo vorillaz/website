@@ -1,21 +1,22 @@
 ---
 import Layout from "./Layout.astro";
 import Header from "@/components/Header.astro";
-import Footer from "@/components/Footer.astro";
 
 export interface Props {
-  frontmatter: {
+  title?: string;
+  description?: string;
+  frontmatter?: {
     title: string;
     description?: string;
   };
 }
-const { frontmatter } = Astro.props;
+const { frontmatter, title } = Astro.props;
 ---
 
-<Layout title={`${frontmatter.title}`}>
+<Layout title={`${title ?? frontmatter?.title}`}>
   <Header />
   <main class="wrap">
-    <div class="content">
+    <div class="content single">
       <slot />
     </div>
   </main>

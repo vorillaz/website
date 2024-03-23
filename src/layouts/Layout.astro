@@ -9,6 +9,8 @@ interface Props {
   canonicalURL?: string;
   pubDatetime?: Date;
   modDatetime?: Date | null;
+  is404?: boolean;
+  slug?: string;
 }
 
 const {
@@ -44,7 +46,6 @@ const prefixedTitle = title ? `${title} | vorillaz.com` : "vorillaz.com";
     <meta name="description" content={description} />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="canonical" href={canonicalURL} />
-    <!-- Theme -->
 
     <!-- Defaults -->
     <meta name="twitter:site" content="@vorillaz" />
@@ -94,5 +95,6 @@ const prefixedTitle = title ? `${title} | vorillaz.com` : "vorillaz.com";
       <slot />
       <Footer />
     </div>
+    <script src="./src/scripts/copy-code.ts" type="module"></script>
   </body>
 </html>

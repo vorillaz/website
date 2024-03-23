@@ -3,14 +3,15 @@ import Layout from "./Layout.astro";
 import Header from "@/components/Header.astro";
 
 interface Props {
+  isArt?: boolean;
   title: string;
   description?: string;
 }
-const { title, description } = Astro.props;
+const { title, description, isArt = false } = Astro.props;
 ---
 
 <Layout title={title} description={description}>
-  <Header isPost={true} />
+  <Header isPost={!isArt} />
   <main class="wrap">
     <slot />
   </main>
