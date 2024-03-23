@@ -1,5 +1,20 @@
 import { defineCollection, z } from "astro:content";
 
+const talks = defineCollection({
+  schema: z.object({
+    title: z.string(),
+    country: z.string(),
+    city: z.string().optional(),
+    date: z.date(),
+    upcoming: z.boolean().optional().default(false),
+    url: z.string().optional(),
+    conference: z.string().optional(),
+    previewVideoUrl: z.string().optional(),
+    videoUrl: z.string().optional(),
+    lang: z.enum(["en", "gr"]).optional(),
+  }),
+});
+
 const generative = defineCollection({
   schema: z.object({
     title: z.string(),
@@ -26,12 +41,15 @@ const generative = defineCollection({
       .optional(),
   }),
 });
+
 const blog = defineCollection({
   // Type-check frontmatter using a schema
   schema: z.object({
     title: z.string(),
     description: z.string(),
     heroImage: z.string().optional(),
+    prompt: z.string().optional(),
+    heroImageGenerator: z.enum(["unsplash", "midjourney"]).optional(),
     categories: z.array(z.string()).optional(),
     keywords: z.array(z.string()).optional(),
     status: z.enum(["draft", "published"]).optional(),
@@ -54,4 +72,12 @@ const blog = defineCollection({
   }),
 });
 
-export const collections = { blog, generative };
+const category = defineCollection({
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    slug: z.string(),
+  }),
+});
+
+export const collections = { blog, generative, talks, category };

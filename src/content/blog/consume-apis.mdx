@@ -28,7 +28,7 @@ I wouldn't complain, argue, or compare the pros and cons of RESTful APIs in this
 ### API changes.
 When something changes in the backend, the frontend always has to keep everything in sync. A simple change in the API call site or the returned payload can cause the frontend to break, and unit testing it is almost impossible to catch any bugs associated with the contract between the two.
 
-```javascript title="users.js" ins={9-12}
+```javascript title="users.js"
 app.post(
   "/create",
   {
@@ -38,7 +38,7 @@ app.post(
         properties: {
           name: { type: "string" },
           // This parameter addition will break the frontend.
-          surname: { type: "string" },
+          surname: { type: "string" }, // [!code ++]
         },
         required: ["name", "surname"],
       },
@@ -143,7 +143,7 @@ Now, we can start our server and visit the Swagger UI at http://localhost:port/d
 
 Finally, upon starting the server in development mode, we will export the OpenAPI specification in JSON format, save it in a local file called `openapi.json` and we are almost done with our backend setup.
 
-```typescript title="server.ts" {8-9}
+```typescript title="server.ts"
 if (process.env.NODE_ENV === "development") {
   const spec = "./openapi/openapi.json";
   const specFile = path.join(__dirname, spec);
@@ -226,7 +226,7 @@ app.get("/users", { schema: retrieveSchema }, (request, reply) => {
 The code above, defines two `users` endpoints, one for creating a user and another one for retrieving all the available users in our system.
 The `retrieveSchema` definition will validate the response and the `createSchema` will serialize and validate the request and the response. We can also add an `operationId` and additional tags to our endpoints, making them more descriptive and reference them later on when building the API client.
 
-```typescript title="api.ts" {2-3, 8-9}
+```typescript title="api.ts" {2-3,8-9}
 const retrieveSchema = {
   operationId: "retrieveUsers",
   tags: ["users"],
@@ -288,7 +288,7 @@ Orval supports splitting the generated code into multiple files, organized by th
 
 Then, we will add a script in our `package.json` file to generate the API client and we are ready to go.
 
-```json title="package.json" {5}
+```json title="package.json" {3}
 {
   "scripts": {
     "generate:api": "orval"
@@ -333,7 +333,7 @@ export const Users = () => {
 Up next, we will also import the `createUser` function which calls the `POST /users` endpoint, once again the name of the function is based on the `operationId` we have defined in the `createSchema` definition. 
 Keep in mind that the passed parameters are type safe and the function will throw an error if we pass an invalid payload.
 
-```tsx title="Users.tsx" {1-2, 8-9}
+```tsx title="Users.tsx" {1,6}
 import { useUsers, createUser } from "sdk/api/users";
 
 export const Users = () => {
@@ -376,7 +376,7 @@ export const server = setupServer(...getUsersMSW());
 
 Then we can import and use the mocking `server` instance in our tests.
 
-```javascript title="Users.test.tsx" {1-3}
+```javascript title="Users.test.tsx"
 import { render, screen } from '@testing-library/react';
 import { server } from 'setupTests';
 import { Users } from './Users';
