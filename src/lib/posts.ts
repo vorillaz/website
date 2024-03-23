@@ -44,6 +44,11 @@ export async function getPostsByCategory(category: string) {
   return posts;
 }
 
+export const getLatestPost = async () => {
+  const posts = await getPosts();
+  return posts[0];
+};
+
 export const getPageNumbers = (numberOfPosts: number) => {
   const numberOfPages = numberOfPosts / Number(postPerPage);
 
@@ -71,7 +76,7 @@ export const getPagination = <T>({
 
   const lastPost = isIndex ? postPerPage : currentPage * postPerPage;
   const startPost = isIndex ? 0 : lastPost - postPerPage;
-  const paginatedPosts = posts.slice(startPost, lastPost);
+  const paginatedPosts = posts.slice(startPost, lastPost) as T[];
 
   return {
     totalPages,
@@ -80,7 +85,9 @@ export const getPagination = <T>({
   };
 };
 
-export const getSortedPosts = (posts: CollectionEntry<"blog">[]) => {
+export const getSortedPosts = (
+  posts: CollectionEntry<"blog">[] | CollectionEntry<"generative">[]
+) => {
   return posts
     .filter(({ data }) => !data.status || data.status === "published")
     .sort(
