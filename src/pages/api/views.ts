@@ -41,11 +41,17 @@ export const GET: APIRoute = async ({ request }) => {
     item = { slug, count: 1 };
   }
 
-  return new Response(JSON.stringify(item), {
-    status: 200,
-    headers: {
-      "content-type": "application/json",
-      "cache-control": "public, s-maxage=60, stale-while-revalidate=25",
-    },
-  });
+  return new Response(
+    JSON.stringify({
+      ...item,
+      time: Date.now(),
+    }),
+    {
+      status: 200,
+      headers: {
+        "content-type": "application/json",
+        "cache-control": "public, s-maxage=60, stale-while-revalidate=25",
+      },
+    }
+  );
 };
