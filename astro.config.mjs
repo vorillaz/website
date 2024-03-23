@@ -1,12 +1,15 @@
 import mdx from "@astrojs/mdx";
-import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import { defineConfig } from "astro/config";
+import svelte from "@astrojs/svelte";
 import vercel from "@astrojs/vercel/serverless";
 import { rehypePlugins, remarkPlugins } from "./config/plugins";
+import db from "@astrojs/db";
 
+// https://astro.build/config
 export default defineConfig({
   site: "https://vorillaz.com",
+  prefetch: true,
   markdown: {
     smartypants: true,
     drafts: true,
@@ -15,8 +18,7 @@ export default defineConfig({
     rehypePlugins,
     remarkPlugins,
   },
-
-  integrations: [mdx(), react(), sitemap()],
+  integrations: [mdx(), svelte({ preprocess: [] }), sitemap(), db()],
   vite: {
     optimizeDeps: {
       exclude: ["@resvg/resvg-js"],

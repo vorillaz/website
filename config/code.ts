@@ -55,12 +55,24 @@ const parseMetaBlock = (meta: string) => {
   return { title, meta };
 };
 
+export const singleLineCodeBlock = () => (tree: any) => {
+  visit(tree, "element", (node: any) => {
+    if (node.tagName === "code") {
+      // if no properties then it's a single backtick code block
+      if (!node.properties || Object.keys(node?.properties).length === 0) {
+        node.properties = {};
+        // change the tag to inline-code
+        node.tagName = "inline-code";
+      }
+    }
+  });
+};
+
 export const codeBlock: Plugin<[], Root> =
   (): Transformer<Root> => (tree: Node) => {
     visit(tree, "code", (node: Code, index: number, parent: Parent) => {
       const { lang, meta = "" } = node as Code;
-
-      const { title, meta: metaBlock } = parseMetaBlock(meta as string);
+      const { title } = parseMetaBlock(meta as string);
       const html = h(
         "div",
         {
@@ -70,83 +82,16 @@ export const codeBlock: Plugin<[], Root> =
             (lang ? ` code-language-${lang}` : ""),
         },
         [
-          h(
-            "div",
-            {
-              class: "copy-code-inner",
-            },
-            [
-              // three dots
-              h(
-                "span",
-                {
-                  class: "dot-code-dots",
-                },
-                [
-                  h("span", {
-                    class: "dot-code-dot",
-                  }),
-                  h("span", {
-                    class: "dot-code-dot",
-                  }),
-                  h("span", {
-                    class: "dot-code-dot",
-                  }),
-                ]
-              ),
-
-              h("span", {
-                class: "code-icon " + (lang ? `icon-language-${lang}` : ""),
-              }),
-
-              h(
-                "span",
-                {
-                  class: "copy-code-title" + (title ? " has-title" : ""),
-                },
-                [
-                  {
-                    value: title ?? "",
-                    type: "text",
-                  },
-                ]
-              ),
-
-              typeof lang === "string" &&
-                h(
-                  "span",
-                  {
-                    class: "copy-code-label sr-only",
-                  },
-                  [
-                    {
-                      value: "Code in " + getLanguageName(lang),
-                      type: "text",
-                    },
-                  ]
-                ),
-              h(
-                "button",
-                {
-                  "aria-label": "Copy code to clipboard",
-                  class: "copy-code-button",
-                  "data-code": node?.value,
-                  "data-lang": lang,
-                },
-                [
-                  h("span", {
-                    class: "copy-code-button-icon",
-                  }),
-                ]
-              ),
-            ]
-          ),
+          h("custom-code-renderer", {
+            lang: lang,
+            langName: getLanguageName(lang ?? ""),
+            code: node?.value,
+            title,
+          }),
           node as unknown as Result,
         ]
       );
 
       parent.children[index] = html;
-      // reasign meta
-      node.meta = metaBlock;
     });
   };
