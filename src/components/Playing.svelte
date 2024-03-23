@@ -7,15 +7,13 @@
 
 {#await fetchSpotify then data}
   {#if data && data.title}
-    <span class="flex gap-half center">
+    <span class="flex gap-half baseline">
       <span class="bars">
         <span class="bar" />
         <span class="bar" />
         <span class="bar" />
       </span>
-      <span>
-        Now listening to {data.title} by {data.artist}
-      </span>
+      <span>Now listening to {data.title} by {data.artist}</span>
     </span>
   {/if}
 {:catch}
