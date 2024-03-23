@@ -45,13 +45,12 @@ async function clickHandler(event: Event) {
   // and then falling back to a DOM-based approach
   const button = event.currentTarget as HTMLButtonElement;
   const dataset = button.dataset as { code: string; copied: string };
-  let ok = false;
   const code = dataset.code.replace(/\u007f/g, "\n");
   try {
     await navigator.clipboard.writeText(code);
-    ok = true;
   } catch (err) {
-    ok = domCopy(code);
+    alert("Failed to copy code to clipboard. Trying alternative method.");
+    domCopy(code);
   }
 
   // Show feedback tooltip

@@ -161,7 +161,7 @@ code {
 /* Generics */
 
 .copy-code-wrapper code {
-  display: flex;
+  display: grid;
   font-size: 13px;
   line-height: 24px;
   flex-direction: column;
