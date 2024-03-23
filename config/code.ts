@@ -1,7 +1,8 @@
-import type { PhrasingContent, Paragraph, Root, Code } from "mdast";
+import type { PhrasingContent, Paragraph, Code } from "mdast";
 import type { Properties, Result } from "hastscript";
 import type { Transformer, Plugin } from "unified";
 import type { Parent, Node } from "unist";
+import type { RemarkPlugins } from "astro";
 
 import { visit } from "unist-util-visit";
 import { h as _h } from "hastscript";
@@ -68,30 +69,29 @@ export const singleLineCodeBlock = () => (tree: any) => {
   });
 };
 
-export const codeBlock: Plugin<[], Root> =
-  (): Transformer<Root> => (tree: Node) => {
-    visit(tree, "code", (node: Code, index: number, parent: Parent) => {
-      const { lang, meta = "" } = node as Code;
-      const { title } = parseMetaBlock(meta as string);
-      const html = h(
-        "div",
-        {
-          class:
-            "copy-code-wrapper" +
-            (title ? " has-title" : "") +
-            (lang ? ` code-language-${lang}` : ""),
-        },
-        [
-          h("custom-code-renderer", {
-            lang: lang,
-            langName: getLanguageName(lang ?? ""),
-            code: node?.value,
-            title,
-          }),
-          node as unknown as Result,
-        ]
-      );
+export const codeBlock: Plugin<[]> = (): Transformer => (tree: Node) => {
+  visit(tree, "code", (node: Code, index: number, parent: Parent) => {
+    const { lang, meta = "" } = node as Code;
+    const { title } = parseMetaBlock(meta as string);
+    const html = h(
+      "div",
+      {
+        class:
+          "copy-code-wrapper" +
+          (title ? " has-title" : "") +
+          (lang ? ` code-language-${lang}` : ""),
+      },
+      [
+        h("custom-code-renderer", {
+          lang: lang,
+          langName: getLanguageName(lang ?? ""),
+          code: node?.value,
+          title,
+        }),
+        node as unknown as Result,
+      ]
+    );
 
-      parent.children[index] = html;
-    });
-  };
+    parent.children[index] = html;
+  });
+};

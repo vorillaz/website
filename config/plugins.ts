@@ -1,4 +1,4 @@
-import type { RemarkPlugins, RehypePlugins } from "astro";
+import type { RehypePlugins } from "astro";
 import rehypeExternalLinks from "rehype-external-links";
 import { createCssVariablesTheme } from "shikiji";
 
@@ -16,7 +16,7 @@ import {
 import { codeBlock, singleLineCodeBlock } from "./code";
 import { wrapLinkContent } from "./link";
 
-export const remarkPlugins: RemarkPlugins = [codeBlock];
+export const remarkPlugins = [codeBlock];
 
 export const rehypePlugins: RehypePlugins = [
   [rehypeExternalLinks, { target: "_blank", rel: "noopener noreferrer" }],
