@@ -29,7 +29,7 @@ const params = new URLSearchParams({
   title: title || "",
   description: description || "",
 });
-const socialImageURL = new URL("og.png?" + params, Astro.url.origin).href;
+const ogImg = new URL("og.png?" + params, Astro.url.origin).href;
 
 // Add the title and description to the social image url
 const prefixedTitle = title ? `${title} | vorillaz.com` : "vorillaz.com";
@@ -56,6 +56,8 @@ const desc = metaDescription ?? description ?? null;
 
     <!-- Open Graph / Facebook -->
     <meta property="og:title" content={prefixedTitle} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={ogImg} />
     {desc && <meta property="og:description" content={desc} />}
     <meta property="og:url" content={canonicalURL} />
 
@@ -86,7 +88,7 @@ const desc = metaDescription ?? description ?? null;
     <meta property="twitter:url" content={canonicalURL} />
     <meta property="twitter:title" content={prefixedTitle} />
     {desc && <meta property="twitter:description" content={desc} />}
-    <meta property="twitter:image" content={socialImageURL} />
+    <meta property="twitter:image" content={ogImg} />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net" />
