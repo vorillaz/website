@@ -1,29 +1,45 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import Icons from "@/components/icons/Icons.astro";
 import PostLayout from "@/layouts/PostLayout.astro";
 import Pagination from "./Pagination.astro";
 import { toShortDateString } from "@/lib/date";
-import PostViews from "./PostViews.astro";
 
 export interface Props {
   title?: string;
+  icon?: string;
+  description?: string;
   currentPage?: number;
   totalPages?: number;
   isPosts?: boolean;
   paginatedPosts: CollectionEntry<"blog">[] | CollectionEntry<"generative">[];
 }
-const { currentPage, totalPages, paginatedPosts, title: t } = Astro.props;
+const {
+  currentPage,
+  totalPages,
+  paginatedPosts,
+  title: t,
+  icon,
+  description,
+} = Astro.props;
 const title = t
   ? t
   : currentPage && currentPage < 2
     ? "Writing."
     : `Writing. - Page ${currentPage}`;
 const heading = t ? t : "Writing.";
+
+const clx = title && description ? "mb" : "mb-2";
+const headingClass = clx + " flex align-center gap-1";
 ---
 
-<PostLayout title={title}>
+<PostLayout title={title} description={description}>
   <div>
-    <h1 class="mb-2">{heading}</h1>
+    <h1 class={headingClass}>
+      <Icons icon={icon} />
+      <span>{heading}</span>
+    </h1>
+    {description && <div class="faded mb-2">{description}</div>}
 
     <ul class="flex flex-column gap-2 no-list sm-only-gap-1">
       {

@@ -1,6 +1,6 @@
 ---
 import { getCollection, type CollectionEntry } from "astro:content";
-import { getSortedPosts } from "../../lib/posts";
+import { getSortedPosts, getCategory } from "../../lib/posts";
 import Posts from "../../components/Posts.astro";
 
 export const prerender = true;
@@ -38,9 +38,15 @@ const posts = await getCollection("blog").then((posts) =>
   )
 );
 const sortedPosts = getSortedPosts(posts);
+const category = await getCategory(slug);
+
+const title = category ? category?.data.title : `#${slug}`;
+const description = category ? category?.data.description : null;
 ---
 
 <Posts
   paginatedPosts={sortedPosts as CollectionEntry<"generative">[]}
-  title={`#${slug}`}
+  title={title}
+  icon={slug}
+  description={description}
 />

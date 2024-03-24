@@ -18,6 +18,13 @@ export async function getCategories() {
   return categories;
 }
 
+export async function getCategory(slug: string) {
+  const categories = await getCollection("categories");
+
+  const category = categories.find((category) => category.slug === slug);
+  return category;
+}
+
 export async function getPosts() {
   const posts = (await getCollection("blog")).sort(
     (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()

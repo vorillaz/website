@@ -30,7 +30,7 @@ const generative = defineCollection({
       .transform((str) => (str ? new Date(str) : undefined)),
     categories: z.array(z.string()).optional(),
     heroImage: z.string().optional(),
-    excerpt: z.string().optional(),
+    description: z.string().optional(),
     fork: z
       .array(
         z.object({
@@ -78,6 +78,7 @@ const category = defineCollection({
     title: z.string(),
     description: z.string(),
     slug: z.string(),
+    metaDescription: z.string().optional(),
   }),
 });
 
