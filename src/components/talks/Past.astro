@@ -1,0 +1,66 @@
+---
+import type { PastTalks } from "../../lib/talks";
+import { toDateString } from "@/lib/date";
+interface Props {
+  past: PastTalks[];
+}
+
+const { past } = Astro.props;
+const getPlace = (t) => {
+  if (t.data.city) {
+    return `${t.data.city}, ${t.data.country}`;
+  }
+  return t.data.country;
+};
+---
+
+<div data-id="past">
+  <ul class="flex flex-column mt gap-half no-list">
+    {
+      past.map((p) => (
+        <li class="flex flex-column gap-half mb">
+          <strong>{p.year}</strong>
+          {p.talks.map((t) => (
+            <div class="flex space-between baseline gap-1 lined sm-flex-column sm-only-gap-fifth">
+              <div class="flex flex-column">
+                <div>{t.data.title}</div>
+                <div>
+                  <span class="badge">{getPlace(t)}</span>
+                  <span class="badge">{t.data.lang}</span>
+                  {t?.data?.videoUrl && (
+                    <span class="badge video">
+                      <a
+                        href={t.data.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Video
+                      </a>
+                    </span>
+                  )}
+                  {t?.data?.previewVideoUrl && (
+                    <span class="badge video">
+                      <a
+                        href={t.data.previewVideoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Preview
+                      </a>
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div class="flex gap-half baseline">
+                <span class="faded small-text text-right">
+                  {t.data.conference}, {toDateString(t.data.date)}
+                </span>
+              </div>
+            </div>
+          ))}
+        </li>
+      ))
+    }
+  </ul>
+</div>

@@ -5,6 +5,7 @@ import { getPageNumbers, getSortedPosts, getPagination } from "@/lib/posts";
 import Posts from "@/components/Posts.astro";
 
 export const prerender = true;
+
 export async function getStaticPaths() {
   const posts = await getCollection(
     "blog",
@@ -23,10 +24,10 @@ const { slug } = Astro.params;
 const posts = await getCollection("blog");
 const sortedPosts = getSortedPosts(posts);
 
-const pagination = getPagination({
-  posts: sortedPosts,
+const pagination = getPagination<CollectionEntry<"blog">>({
+  posts: sortedPosts as CollectionEntry<"blog">[],
   page: slug,
 });
 ---
 
-<Posts {...pagination} />
+<Posts {...pagination} isPosts />

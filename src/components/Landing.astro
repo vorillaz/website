@@ -1,273 +1,43 @@
-<div class="flex max-w-[64rem] flex-col items-center gap-5 text-left">
-  <div class="flex flex-col items-center gap-2 px-10">
-    <h1
-      class="font-heading sm:text-4xl md:text-6xl font-bold"
-      data-boom
-      class=""
-    >
-      Everything is under construction.
+---
+import LatestPost from "./LatestPost.astro";
+import Playing from "./Playing.svelte";
+---
+
+<div class="wrap">
+  <div>
+    <span class="as-h1 as-header">
+      Hello, I am <a class="big-link" href="/about">Theodore.</a>
       <br />
-      <span>
-        Nothing is under <span data-delay data-text="control." data-glitch>
-          control.
-        </span>
+      <span class="faded">
+        an independent software engineer and a tech enthusiast from Greece.
       </span>
-    </h1>
-    <div class="prose mt-10">
-      <p class="">
-        <a href="/posts">Writing</a>
-        <a href="/about">About</a>
-        <a href="/state">Transient State</a>
-      </p>
-    </div>
+      <br />
+      <span class="faded">
+        Currently building <a class="big-link" href="https://proxima.so">
+          Proxima Analytics.
+        </a>
+      </span>
+      <span class="faded">
+        I like <a class="big-link" href="/posts">to write</a> about software and
+        try to create <a class="big-link" href="/projects">some stuff</a> for the
+        web.
+      </span>
+    </span>
+    <span class="as-h1 as-header faded">
+      Occassionally I travel and <a class="big-link" href="/talks">speak</a> at conferences.
+    </span>
+    <h2 class="faded relaxed">
+      <LatestPost />
+    </h2>
+    <h2 class="faded relaxed">
+      <Playing client:only />
+    </h2>
   </div>
 </div>
 
 <style>
-  [data-glitch] {
-    position: relative;
-    animation: glitch-skew 1s infinite linear alternate-reverse;
-  }
-
-  [data-glitch]::before {
-    content: attr(data-text);
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    left: 2px;
-    text-shadow: -2px 0 #ff00c1;
-    /* Creates an initial clip for our glitch. This works in
-  a typical top,right,bottom,left fashion and creates a mask
-  to only show a certain part of the glitch at a time. */
-    clip: rect(44px, 450px, 56px, 0);
-    /* Runs our glitch-anim defined below to run in a 5s loop, infinitely,
-  with an alternating animation to keep things fresh. */
-    animation: glitch-anim 5s infinite linear alternate-reverse;
-  }
-
-  [data-glitch]::after {
-    content: attr(data-text);
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    left: -2px;
-    text-shadow:
-      -2px 0 #00fff9,
-      2px 2px #ff00c1;
-    animation: glitch-anim2 1s infinite linear alternate-reverse;
-  }
-
-  @keyframes glitch-anim {
-    0% {
-      clip: rect(5px, 9999px, 65px, 0);
-      transform: skew(0.49deg);
-    }
-    5% {
-      clip: rect(93px, 9999px, 71px, 0);
-      transform: skew(0.68deg);
-    }
-    10% {
-      clip: rect(58px, 9999px, 22px, 0);
-      transform: skew(0.78deg);
-    }
-    15% {
-      clip: rect(97px, 9999px, 39px, 0);
-      transform: skew(0.97deg);
-    }
-    20% {
-      clip: rect(89px, 9999px, 70px, 0);
-      transform: skew(0.79deg);
-    }
-    25% {
-      clip: rect(45px, 9999px, 54px, 0);
-      transform: skew(0.61deg);
-    }
-    30% {
-      clip: rect(46px, 9999px, 10px, 0);
-      transform: skew(0.35deg);
-    }
-    35% {
-      clip: rect(1px, 9999px, 52px, 0);
-      transform: skew(0.09deg);
-    }
-    40% {
-      clip: rect(26px, 9999px, 77px, 0);
-      transform: skew(0.05deg);
-    }
-    45% {
-      clip: rect(89px, 9999px, 26px, 0);
-      transform: skew(0.65deg);
-    }
-    50% {
-      clip: rect(66px, 9999px, 93px, 0);
-      transform: skew(0.31deg);
-    }
-    55% {
-      clip: rect(65px, 9999px, 40px, 0);
-      transform: skew(0.65deg);
-    }
-    60% {
-      clip: rect(64px, 9999px, 77px, 0);
-      transform: skew(0.41deg);
-    }
-    65% {
-      clip: rect(26px, 9999px, 71px, 0);
-      transform: skew(0.66deg);
-    }
-    70% {
-      clip: rect(49px, 9999px, 73px, 0);
-      transform: skew(0.92deg);
-    }
-    75% {
-      clip: rect(74px, 9999px, 30px, 0);
-      transform: skew(0.6deg);
-    }
-    80% {
-      clip: rect(54px, 9999px, 35px, 0);
-      transform: skew(0.17deg);
-    }
-    85% {
-      clip: rect(13px, 9999px, 84px, 0);
-      transform: skew(0.76deg);
-    }
-    90% {
-      clip: rect(67px, 9999px, 59px, 0);
-      transform: skew(0.44deg);
-    }
-    95% {
-      clip: rect(56px, 9999px, 71px, 0);
-      transform: skew(0.03deg);
-    }
-    100% {
-      clip: rect(99px, 9999px, 81px, 0);
-      transform: skew(0.46deg);
-    }
-  }
-
-  @keyframes glitch-anim2 {
-    0% {
-      clip: rect(3px, 9999px, 64px, 0);
-      transform: skew(0.66deg);
-    }
-    5% {
-      clip: rect(9px, 9999px, 71px, 0);
-      transform: skew(1deg);
-    }
-    10% {
-      clip: rect(85px, 9999px, 69px, 0);
-      transform: skew(0.72deg);
-    }
-    15% {
-      clip: rect(79px, 9999px, 54px, 0);
-      transform: skew(0.06deg);
-    }
-    20% {
-      clip: rect(54px, 9999px, 94px, 0);
-      transform: skew(0.27deg);
-    }
-    25% {
-      clip: rect(53px, 9999px, 13px, 0);
-      transform: skew(0.5deg);
-    }
-    30% {
-      clip: rect(58px, 9999px, 65px, 0);
-      transform: skew(0.25deg);
-    }
-    35% {
-      clip: rect(74px, 9999px, 1px, 0);
-      transform: skew(0.81deg);
-    }
-    40% {
-      clip: rect(54px, 9999px, 56px, 0);
-      transform: skew(0.38deg);
-    }
-    45% {
-      clip: rect(9px, 9999px, 57px, 0);
-      transform: skew(0.58deg);
-    }
-    50% {
-      clip: rect(16px, 9999px, 14px, 0);
-      transform: skew(0.48deg);
-    }
-    55% {
-      clip: rect(44px, 9999px, 64px, 0);
-      transform: skew(0.8deg);
-    }
-    60% {
-      clip: rect(25px, 9999px, 44px, 0);
-      transform: skew(0.03deg);
-    }
-    65% {
-      clip: rect(29px, 9999px, 37px, 0);
-      transform: skew(0.34deg);
-    }
-    70% {
-      clip: rect(57px, 9999px, 32px, 0);
-      transform: skew(0.13deg);
-    }
-    75% {
-      clip: rect(21px, 9999px, 73px, 0);
-      transform: skew(0.98deg);
-    }
-    80% {
-      clip: rect(97px, 9999px, 75px, 0);
-      transform: skew(0.92deg);
-    }
-    85% {
-      clip: rect(25px, 9999px, 1px, 0);
-      transform: skew(0.57deg);
-    }
-    90% {
-      clip: rect(99px, 9999px, 44px, 0);
-      transform: skew(0.38deg);
-    }
-    95% {
-      clip: rect(95px, 9999px, 41px, 0);
-      transform: skew(0.51deg);
-    }
-    100% {
-      clip: rect(73px, 9999px, 76px, 0);
-      transform: skew(0.28deg);
-    }
-  }
-
-  @keyframes glitch-skew {
-    0% {
-      transform: skew(-4deg);
-    }
-    10% {
-      transform: skew(-4deg);
-    }
-    20% {
-      transform: skew(3deg);
-    }
-    30% {
-      transform: skew(2deg);
-    }
-    40% {
-      transform: skew(-2deg);
-    }
-    50% {
-      transform: skew(-4deg);
-    }
-    60% {
-      transform: skew(-1deg);
-    }
-    70% {
-      transform: skew(5deg);
-    }
-    80% {
-      transform: skew(3deg);
-    }
-    90% {
-      transform: skew(-2deg);
-    }
-    100% {
-      transform: skew(3deg);
-    }
+  /* tiny override */
+  h2 + h2 {
+    margin-top: calc(var(--gap));
   }
 </style>

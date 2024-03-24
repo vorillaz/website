@@ -1,0 +1,21 @@
+---
+interface Props {
+  url: string;
+  title: string;
+  desc?: string;
+  badges?: string[];
+}
+const { url, title, badges, desc } = Astro.props;
+---
+
+<div class="flex flex-column lined no-p">
+  <div class="flex space-between baseline gap-half sm-flex-column">
+    <a class="subfaded" href={url} target="_blank">
+      {title}
+    </a>
+    <span class="post-info sm-hide">
+      {badges?.map((badge) => <span class="badge">{badge}</span>)}
+    </span>
+  </div>
+  <div class="small-text">{desc}</div>
+</div>

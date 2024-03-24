@@ -12,28 +12,22 @@ const prev = currentPage > 1 ? "" : "disabled";
 const next = currentPage < totalPages ? "" : "disabled";
 ---
 
-<div class="mt-8 flex justify-center">
+<div class="mt">
   {
     totalPages > 1 && (
-      <nav class="pagination-wrapper mt-8" aria-label="Pagination">
+      <nav aria-label="Pagination" class="flex gap-1 small-text">
         {
           <a
             aria-disabled={prev === "disabled"}
             href={prevUrl}
-            class={`mr-4 select-none ${prev}`}
             aria-label="Previous"
           >
-            Prev
+            <span>Previous</span>
           </a>
         }
         {currentPage} / {totalPages}
-        <a
-          aria-disabled={next === "disabled"}
-          href={nextUrl}
-          class={`ml-4 select-none ${next}`}
-          aria-label="Next"
-        >
-          Next
+        <a aria-disabled={next === "disabled"} href={nextUrl} aria-label="Next">
+          <span>Next</span>
         </a>
       </nav>
     )

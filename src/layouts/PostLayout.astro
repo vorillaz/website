@@ -1,19 +1,31 @@
 ---
 import Layout from "./Layout.astro";
 import Header from "@/components/Header.astro";
-import Footer from "@/components/Footer.astro";
 
 interface Props {
+  isArt?: boolean;
   title: string;
   description?: string;
+  metaDescription?: string;
+  keywords?: string[];
 }
-const { title, description } = Astro.props;
+const {
+  title,
+  description,
+  isArt = false,
+  metaDescription,
+  keywords,
+} = Astro.props;
 ---
 
-<Layout title={title} description={description}>
-  <Header />
-  <main id="main-content" class="min-w-full sm:max-w-none md:max-w-none">
+<Layout
+  title={title}
+  description={description}
+  metaDescription={metaDescription}
+  keywords={keywords}
+>
+  <Header isPost={!isArt} />
+  <main class="wrap">
     <slot />
   </main>
-  <Footer />
 </Layout>

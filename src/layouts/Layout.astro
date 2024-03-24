@@ -1,19 +1,27 @@
 ---
-import { ViewTransitions } from "astro:transitions";
+import "../styles/refined.css";
+import Footer from "@/components/Footer.astro";
 
+import { ViewTransitions } from "astro:transitions";
 interface Props {
   title: string;
   description?: string;
+  metaDescription?: string;
   canonicalURL?: string;
+  keywords?: string[];
   pubDatetime?: Date;
   modDatetime?: Date | null;
+  is404?: boolean;
+  slug?: string;
 }
 
 const {
   title,
   description,
+  metaDescription,
   pubDatetime,
   modDatetime,
+  keywords,
   canonicalURL = new URL(Astro.url.pathname, Astro.site).href,
 } = Astro.props;
 
@@ -24,31 +32,32 @@ const params = new URLSearchParams({
 const socialImageURL = new URL("og.png?" + params, Astro.url.origin).href;
 
 // Add the title and description to the social image url
-
 const prefixedTitle = title ? `${title} | vorillaz.com` : "vorillaz.com";
+const desc = metaDescription ?? description ?? null;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
 
     <!-- Meta for seo and so on -->
     <meta name="title" content={prefixedTitle} />
-    <meta name="description" content={description} />
+    {desc && <meta name="description" content={desc} />}
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="canonical" href={canonicalURL} />
 
-    <!-- Open Graph / Facebook -->
+    <!-- Defaults -->
+    <meta name="twitter:site" content="@vorillaz" />
+    <meta name="twitter:creator" content="@vorillaz" />
 
+    <!-- Open Graph / Facebook -->
     <meta property="og:title" content={prefixedTitle} />
-    <meta property="og:description" content={description} />
+    {desc && <meta property="og:description" content={desc} />}
     <meta property="og:url" content={canonicalURL} />
-    <meta property="og:image" content={socialImageURL} />
 
     <!-- Article Published/Modified time -->
     {
@@ -67,25 +76,32 @@ const prefixedTitle = title ? `${title} | vorillaz.com` : "vorillaz.com";
         />
       )
     }
+    {
+      keywords &&
+        keywords.length > 0 &&
+        keywords.map((keyword) => <meta name="article:tag" content={keyword} />)
+    }
 
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content={canonicalURL} />
     <meta property="twitter:title" content={prefixedTitle} />
-    <meta property="twitter:description" content={description} />
+    {desc && <meta property="twitter:description" content={desc} />}
     <meta property="twitter:image" content={socialImageURL} />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net" />
     <link
-      href="https://fonts.bunny.net/css?family=inter:200,300,400,500,600,700,800,900|jetbrains-mono:400,400i"
+      href="https://fonts.bunny.net/css?family=ibm-plex-sans:400,400i,500i,600|jetbrains-mono:400,400i"
       rel="stylesheet"
     />
     <title>{prefixedTitle}</title>
     <ViewTransitions />
   </head>
   <body>
-    <div class="mx-auto max-w-4xl px-4 md:px-0">
+    <div class="page">
       <slot />
+      <Footer />
     </div>
+    <script src="/src/scripts/copy-code.ts" type="module"></script>
   </body>
 </html>

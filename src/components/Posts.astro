@@ -1,52 +1,76 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import Icons from "@/components/icons/Icons.astro";
 import PostLayout from "@/layouts/PostLayout.astro";
 import Pagination from "./Pagination.astro";
-import { toDateString } from "@/lib/date";
+import { toShortDateString } from "@/lib/date";
 
 export interface Props {
-  currentPage: number;
-  totalPages: number;
-  paginatedPosts: CollectionEntry<"blog">[];
+  title?: string;
+  icon?: string;
+  description?: string;
+  currentPage?: number;
+  totalPages?: number;
+  isPosts?: boolean;
+  paginatedPosts: CollectionEntry<"blog">[] | CollectionEntry<"generative">[];
 }
-const { currentPage, totalPages, paginatedPosts } = Astro.props;
-const title = currentPage < 2 ? "Writing." : `Writing. - Page ${currentPage}`;
+const {
+  currentPage,
+  totalPages,
+  paginatedPosts,
+  title: t,
+  icon,
+  description,
+} = Astro.props;
+const title = t
+  ? t
+  : currentPage && currentPage < 2
+    ? "Writing."
+    : `Writing. - Page ${currentPage}`;
+const heading = t ? t : "Writing.";
+
+const clx = title && description ? "mb" : "mb-2";
+const headingClass = clx + " flex align-center gap-1";
 ---
 
-<PostLayout title={title}>
-  <div class="container flex flex-col max-w-[64rem] mb-10">
-    <h1 class="mb-10">
-      <span class="text-4xl font-bold">Writing.</span>
+<PostLayout title={title} description={description}>
+  <div>
+    <h1 class={headingClass}>
+      <Icons icon={icon} />
+      <span>{heading}</span>
     </h1>
+    {description && <div class="faded mb-2">{description}</div>}
 
-    <ul class="flex flex-col gap-7">
+    <ul class="flex flex-column gap-2 no-list sm-only-gap-1">
       {
         paginatedPosts.map(({ data, slug }) => (
-          <li>
-            <a href={`/${slug}`}>
-              <span class="flex place-content-between  gap-10">
-                <span class="flex flex-col gap-2">
-                  <span>{data.title}</span>
-                </span>
-                <time class="opacity-50 text-sm date text-right">
-                  {toDateString(data.pubDate)}
-                </time>
-              </span>
-            </a>
-            <div class="opacity-50 max-w-lg mt-1">{data.description}</div>
+          <li class="flex gap-half flex-column">
+            <div class="flex space-between align-top gap-1 sm-flex-column sm-only-gap-fifth">
+              <a href={`/${slug}`} data-astro-prefetch>
+                <span>{data.title}</span>
+              </a>
+              <time class="post-info sm-ml-0">
+                {toShortDateString(data.pubDate)}
+              </time>
+            </div>
+            <div class="small-text sm-hide">{data.description}</div>
           </li>
         ))
       }
     </ul>
-    <div>
-      <Pagination
-        {currentPage}
-        {totalPages}
-        prevUrl={`/posts${
-          currentPage - 1 !== 1 ? "/" + (currentPage - 1) : ""
-        }`}
-        nextUrl={`/posts/${currentPage + 1}`}
-      />
-    </div>
+    {
+      currentPage && totalPages && (
+        <div class="mt-2">
+          <Pagination
+            {currentPage}
+            {totalPages}
+            prevUrl={`/posts${
+              currentPage - 1 !== 1 ? "/" + (currentPage - 1) : ""
+            }`}
+            nextUrl={`/posts/${currentPage + 1}`}
+          />
+        </div>
+      )
+    }
   </div>
 </PostLayout>

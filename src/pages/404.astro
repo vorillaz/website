@@ -2,20 +2,24 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="404.">
-  <section class="flex justify-center items-center h-screen">
-    <div
-      class="container flex max-w-[64rem] flex-col items-center gap-5 text-left"
-    >
-      <h1
-        data-boom
-        class="font-heading text-4xl font-bold sm:text-5xl md:text-6xl lg:text-7xl !leading-[1.1] text-balance"
-      >
-        The void is calling.
+<Layout title="404." is404={true}>
+  <section class="wrap">
+    <div class="flex flex-column">
+      <h1>
+        <span data-boom class="faded"
+          >Lorem Ipsum is simply dummy text of the printing and typesetting
+          industry.
+        </span>
+        <span>The void is calling.</span>
+        <span class="faded" data-boom
+          >Contrary to popular belief, Lorem Ipsum is not simply random text. It
+          has roots in a piece of classical Latin literature from 45 BC, making
+          it over 2000 years old.</span
+        >
       </h1>
-      <div class="">
-        <a href="/" class="text-balance hover:text-balance-light">
-          Go back home
+      <div class="mt">
+        <a href="/">
+          <span> Go back home </span>
         </a>
       </div>
     </div>

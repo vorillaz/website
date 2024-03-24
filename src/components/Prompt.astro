@@ -1,0 +1,22 @@
+---
+import Copy from "./icons/Copy.astro";
+import Check from "./icons/Check.astro";
+
+interface Props {
+  heroImageGenerator?: string;
+  prompt: string;
+}
+const { heroImageGenerator, prompt }: Props = Astro.props;
+---
+
+<button class="fluid copy-btn" data-id="cp" data-copy-btn data-code={prompt}>
+  <span class="btn-text">Image prompt from MidJourney </span>
+  <span class="icon-holder">
+    <span data-id="copy-icon" class="btn-holder btn-icon-copy">
+      <Copy class="cp" />
+    </span>
+    <span data-id="check-icon" class="btn-holder btn-icon-check">
+      <Check class="cp" />
+    </span>
+  </span>
+</button>

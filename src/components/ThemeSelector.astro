@@ -1,0 +1,129 @@
+---
+import Js from "./icons/Jss.astro";
+import Sun from "./icons/Sun.astro";
+import Moon from "./icons/Moon.astro";
+---
+
+<div data-toggle-picker class="theme-selector">
+  <span class="sr-only">Toggle theme helpers</span>
+  <ul class="theme-list flex flex-center">
+    <li class="light">
+      <button data-toggle-theme="light">
+        <Sun />
+      </button>
+    </li>
+    <li class="dark">
+      <button data-toggle-theme="dark">
+        <Moon />
+      </button>
+    </li>
+
+    <li class="js">
+      <button data-toggle-theme="js">
+        <Js />
+      </button>
+    </li>
+  </ul>
+</div>
+
+<style>
+  svg {
+    color: var(--text);
+    width: 16px;
+    height: auto;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: var(--faded-bg);
+    line-height: 1;
+    border-radius: var(--radius);
+    align-items: center;
+    justify-content: center;
+  }
+  li {
+    display: flex;
+  }
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    height: 24px;
+    width: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border-radius: var(--radius);
+    color: var(--text);
+    transition: background 0.2s ease;
+  }
+
+  [data-toggle-theme-active],
+  button:hover {
+    background: var(--faded-bg);
+  }
+</style>
+
+<script lang="ts" is:inline>
+  function setTheme(theme) {
+    const themeBtns = document.querySelectorAll("[data-toggle-theme]");
+    if (!themeBtns) return;
+    // remove all the data-theme attributes
+    themeBtns.forEach((btn) => {
+      btn.removeAttribute("data-toggle-theme-active");
+    });
+
+    // find the button with the selected theme and add the data-theme attribute
+    const selected = document.querySelector(`[data-toggle-theme="${theme}"]`);
+    selected?.setAttribute("data-toggle-theme-active", "selected");
+  }
+  function switchTheme() {
+    const themes = ["dark", "light", "js"];
+
+    const key = "v-for";
+    const themeBtns = document.querySelectorAll("[data-toggle-theme]");
+    const doc = document.documentElement;
+
+    const store = (selected) => {
+      doc.setAttribute("data-theme", selected);
+      localStorage.setItem(key, selected);
+    };
+
+    const fromLocal = localStorage.getItem(key) ?? themes[0];
+
+    const dark = window.matchMedia("(darkers-color-scheme: dark)").matches;
+    const light = window.matchMedia("(darkers-color-scheme: light)").matches;
+
+    if (!fromLocal && dark) {
+      store("dark");
+    } else if (!fromLocal && light) {
+      store("light");
+    } else if (fromLocal) {
+      store(fromLocal);
+      setTheme(fromLocal);
+    }
+
+    if (themeBtns) {
+      themeBtns.forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          const selected = btn.getAttribute("data-toggle-theme");
+          store(selected);
+          setTheme(selected);
+        });
+      });
+    }
+  }
+
+  (function run() {
+    switchTheme();
+  })();
+
+  document.addEventListener("astro:page-load", () => {
+    switchTheme();
+  });
+</script>

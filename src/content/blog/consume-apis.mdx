@@ -11,10 +11,12 @@ categories:
   - javascript
   - react
   - svelte
+  - vue
   - fastify
+  - openapi
   - automation
-  - systems
 description: Learn how to consume RESTful APIs with React, Vue and Svelte.
+metaDescription: Learn how to consume RESTful APIs with React, Vue and Svelte using Swagger and OpenAPI.
 ---
 
 <Note>The full working code for this tutorial is available on [GitHub](https://github.com/vorillaz/react-openapi-swr).</Note>
@@ -28,7 +30,7 @@ I wouldn't complain, argue, or compare the pros and cons of RESTful APIs in this
 ### API changes.
 When something changes in the backend, the frontend always has to keep everything in sync. A simple change in the API call site or the returned payload can cause the frontend to break, and unit testing it is almost impossible to catch any bugs associated with the contract between the two.
 
-```javascript title="users.js" ins={9-12}
+```javascript title="users.js"
 app.post(
   "/create",
   {
@@ -38,7 +40,7 @@ app.post(
         properties: {
           name: { type: "string" },
           // This parameter addition will break the frontend.
-          surname: { type: "string" },
+          surname: { type: "string" }, // [!code ++]
         },
         required: ["name", "surname"],
       },
@@ -103,7 +105,7 @@ In order to demonstrate how to automatically generate a client SDK in the fronte
 We can start by installing the required dependencies for our backend.
 
 ```bash
-❏ ~ npm i fastify fastify-swagger @fastify/swagger-ui
+npm i fastify fastify-swagger @fastify/swagger-ui
 ```
 
 Then we are going to create a simple `fastify` instance, attach the `fastify-swagger` and `fastify-swagger-ui` modules as plugins, and configure the OpenAPI specification metadata.
@@ -143,7 +145,7 @@ Now, we can start our server and visit the Swagger UI at http://localhost:port/d
 
 Finally, upon starting the server in development mode, we will export the OpenAPI specification in JSON format, save it in a local file called `openapi.json` and we are almost done with our backend setup.
 
-```typescript title="server.ts" {8-9}
+```typescript title="server.ts"
 if (process.env.NODE_ENV === "development") {
   const spec = "./openapi/openapi.json";
   const specFile = path.join(__dirname, spec);
@@ -226,7 +228,7 @@ app.get("/users", { schema: retrieveSchema }, (request, reply) => {
 The code above, defines two `users` endpoints, one for creating a user and another one for retrieving all the available users in our system.
 The `retrieveSchema` definition will validate the response and the `createSchema` will serialize and validate the request and the response. We can also add an `operationId` and additional tags to our endpoints, making them more descriptive and reference them later on when building the API client.
 
-```typescript title="api.ts" {2-3, 8-9}
+```typescript title="api.ts" {2-3,8-9}
 const retrieveSchema = {
   operationId: "retrieveUsers",
   tags: ["users"],
@@ -255,7 +257,7 @@ As an alternative, you can also use the official [OpenAPI Generator](https://ope
 In our frontend codebase, we will install `orval` using the following command:
 
 ```bash
-❏ ~ npm i -D orval
+npm i -D orval
 ```
 
 Up next, we will create a configuration file called `orval.config.js` in the root of our project and add the following configuration:
@@ -288,7 +290,7 @@ Orval supports splitting the generated code into multiple files, organized by th
 
 Then, we will add a script in our `package.json` file to generate the API client and we are ready to go.
 
-```json title="package.json" {5}
+```json title="package.json" {3}
 {
   "scripts": {
     "generate:api": "orval"
@@ -333,7 +335,7 @@ export const Users = () => {
 Up next, we will also import the `createUser` function which calls the `POST /users` endpoint, once again the name of the function is based on the `operationId` we have defined in the `createSchema` definition. 
 Keep in mind that the passed parameters are type safe and the function will throw an error if we pass an invalid payload.
 
-```tsx title="Users.tsx" {1-2, 8-9}
+```tsx title="Users.tsx" {1,6}
 import { useUsers, createUser } from "sdk/api/users";
 
 export const Users = () => {
@@ -408,10 +410,10 @@ Additionally, using the [OpenAPI Generator](https://openapi-generator.tech/docs/
 
 ```bash
 # Generate a php laravel server
-❏ ~ npx @openapitools/openapi-generator-cli generate -i ./openapi/openapi.json -g php-laravel -o ./server
+npx @openapitools/openapi-generator-cli generate -i ./openapi/openapi.json -g php-laravel -o ./server
 
 # Or a nodejs express server
-❏ ~ npx @openapitools/openapi-generator-cli generate -i ./openapi.yaml -g nodejs-express-server -o ./another-server
+npx @openapitools/openapi-generator-cli generate -i ./openapi.yaml -g nodejs-express-server -o ./another-server
 ```
 
 

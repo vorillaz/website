@@ -1,30 +1,24 @@
 import mdx from "@astrojs/mdx";
-import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
-import tailwind from "@astrojs/tailwind";
 import { defineConfig } from "astro/config";
-import expressiveCode from "astro-expressive-code";
+import svelte from "@astrojs/svelte";
 import vercel from "@astrojs/vercel/serverless";
+import { rehypePlugins, remarkPlugins } from "./config/plugins";
+import db from "@astrojs/db";
 
+// https://astro.build/config
 export default defineConfig({
   site: "https://vorillaz.com",
+  prefetch: true,
   markdown: {
     smartypants: true,
     drafts: true,
+    syntaxHighlight: false,
+    extendDefaultPlugins: true,
+    rehypePlugins,
+    remarkPlugins,
   },
-  integrations: [
-    expressiveCode({
-      styleOverrides: {
-        uiFontFamily: "Inter",
-        codeFontFamily: "JetBrains Mono",
-      },
-      themes: ["nord", "solarized-light"],
-    }),
-    mdx(),
-    react(),
-    sitemap(),
-    tailwind(),
-  ],
+  integrations: [mdx(), svelte({ preprocess: [] }), sitemap(), db()],
   vite: {
     optimizeDeps: {
       exclude: ["@resvg/resvg-js"],

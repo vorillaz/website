@@ -1,0 +1,260 @@
+---
+  title: 'How to Build a Views Counter with Astro DB'
+  description: 'Get started with Astro DB by building a views counter component for your blog.'
+  pubDate: 'Mar 24 2024'
+  status: 'published'
+  heroImage: '/imgs/astro-views.png'
+  prompt: 'Airport mechanical flight display split-flap Departure Board,snap shooting, natural light, cinematic, coloring electric camera 70mm film, mood is 1970s in New York,adding organic shapes to the geometric environment, UHD resolution --style raw --stylize 600 --ar 16:9'
+  heroImageGenerator: midjourney
+  metaDescription: 'Learn how to build a views counter component for your blog using Astro DB.'
+  categories: ['astro', 'javascript', 'astro-db']
+---
+
+In my early days of browsing, I can remember one of the most iconic widgets on the web: the views counter at the bottom of a blog post. It was a clear way to showcase the popularity of a post, and it was always fun to see how many people had read it. Platforms like [Geocities](https://wiki.archiveteam.org/index.php/GeoCities) and [MySpace](https://twitter.com/myspacetom) had this functionality long before the birth of [Google Analytics](https://proxima.so/vs-google-analytics) or any basic analytics, for that matter.
+
+In early March 2024, [Astro DB](https://astro.build/db/) was launched, introducing a new database service built atop Turso, LibSql, and Astro. It's a simple, fast, and reliable database service, perfectly suited for content-related applications. This inspired me to create a views counter for my blog using Astro DB since I am already using Astro.
+
+## Getting Started
+First, you need to have an Astro Studio account. You can sign up for a free account at [studio.astro.build](https://studio.astro.build/). Once you have an account, you can create a new database and obtain your API key.
+
+Upgrade your Astro project to the latest version (later than 4.5.0) and install the `@astrojs/db` package. This can be done through the Astro CLI helper, as mentioned in the [Astro DB documentation](https://docs.astro.build/en/guides/astro-db/).
+
+```bash
+npx astro add db
+```
+
+## Define Your Database Schema
+After setting up, you can create your database and define your schema. Astro DB schemas are configured through a single TypeScript file. Define your schema in a file named `db/config.ts`:
+
+```typescript title="db/config.ts"
+import { defineDb } from 'astro:db';
+
+export default defineDb({
+  tables: { },
+});
+```
+
+Now, it's time to define your Views schema. For this example, we will create a table named `Views` with a `count` column and a `slug` column. The `slug` column will identify the post associated with the view count.
+
+```typescript title="db/config.ts" {3-10}
+import { defineDb, defineTable, column } from "astro:db";
+
+const Views = defineTable({
+  columns: {
+    slug: column.text({ primaryKey: true }),
+    count: column.number({
+      default: 1,
+    }),
+  },
+});
+
+export default defineDb({
+  tables: { Views },
+});
+```
+
+## Creating the ViewCounter Component.
+With our database set up, we can now create a view counter for our blog. We'll develop an Astro component to display and increment the view count when the post is viewed.
+
+```astro title="components/ViewCounter.astro"
+---
+import { db, Views, sql } from "astro:db";
+const { slug } = Astro.props;
+let item;
+
+try {
+  item = await db
+    .insert(Views)
+    .values({
+      slug,
+      count: 1,
+    })
+    .onConflictDoUpdate({
+      target: Views.slug,
+      set: {
+        count: sql`count + 1`,
+      },
+    })
+    .returning({
+      slug: Views.slug,
+      count: Views.count,
+    });
+} catch (error) {
+  console.error(error);
+  item = { slug, count: 1 };
+}
+---
+
+<div>
+  <p>Views: {item.count}</p>
+</div>
+```
+
+The `<ViewCounter />` component utilizes the `db` object to interact with the database. The Astro DB package includes [Drizzle ORM](https://docs.astro.build/en/guides/astro-db/#drizzle-orm), which provides a typesafe API for database transactions. In the `<ViewCounter />` component, we inject the `slug` prop to identify the associated post. We then attempt to insert a new row into the `Views` table with the `slug` and a `count` of 1. If the row already exists, we increment the `count` by 1 using the `onConflictDoUpdate` method and return the updated row, this is how upserts are handled by Drizzle.
+
+## Using the ViewCounter Component.
+
+With our `ViewCounter` component ready, we can add it into our blog post template. We use the `slug` from the URL as a key to identify the associated post.
+
+```astro title="pages/blog/[slug].astro"
+---
+import ViewCounter from '@/components/ViewCounter.astro';
+const slug = Astro.params.slug;
+---
+
+<article>
+  <h1>{slug}</h1>
+  <ViewCounter slug={slug} />
+  <p>Post content goes here</p>
+</article>
+```
+
+## Creating an Article Listing Component.
+
+For post listing we can also create a small utility component for showing the views per entry in the list. This time instead of incrementing the view count we will just read the count from the database.
+
+```astro title="components/Views.astro"
+---
+import { db, Views, eq } from "astro:db";
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+const found = await db
+    .select({
+      count: Views.count,
+    })
+    .from(Views)
+    .where(eq(Views.slug, slug ));
+const count = found[0]?.count || 0;
+---
+
+<span>Views: {count}</span>
+```
+
+And then we can use this component in our listing page.
+
+```astro title="pages/blog.astro"
+---
+import { getCollection } from 'astro:content';
+import Views from '@/components/Views.astro';
+
+// Get all `src/content/blog/` entries
+const allBlogPosts = await getCollection('blog');
+
+const posts = await Astro
+---
+<ul>
+  {posts.map((post) => (
+    <li>
+      <h2><a href={`/blog/${post.slug}`}>{post.title}</a></h2>
+      <Views slug={post.slug} />
+    </li>
+  ))}
+</ul>
+```
+
+## Client Side Rendering & API Routes.
+
+Since Astro components do not render in the client and our blog is mostly static, we need to use an API route to increment the view count in order to avoid server-side rendering delays. We can easily create an API route to handle the view count increment and return the updated count for the specified `slug`.
+
+```ts title="api/views.ts"
+import type { APIRoute } from "astro";
+import { db, Views, sql, eq } from "astro:db";
+
+export const GET: APIRoute = async ({ request }) => {
+  const url = new URL(request.url);
+  const params = new URLSearchParams(url.search);
+
+  const slug = params.get("slug");
+
+  if (!slug) {
+    return new Response("Not found", { status: 404 });
+  }
+
+  let item;
+  try {
+    const views = await db
+      .select({
+        count: Views.count,
+      })
+      .from(Views)
+      .where(eq(Views.slug, slug));
+
+    item = await db
+      .insert(Views)
+      .values({
+        slug: slug,
+        count: 1,
+      })
+      .onConflictDoUpdate({
+        target: Views.slug,
+        set: {
+          count: sql`count + 1`,
+        },
+      })
+      .returning({
+        slug: Views.slug,
+        count: Views.count,
+      })
+      .then((res) => res[0]);
+  } catch (error) {
+    item = { slug, count: 1 };
+  }
+
+  return new Response(JSON.stringify(item), {
+    status: 200,
+    headers: {
+      "content-type": "application/json",
+      "cache-control": "public, s-maxage=60, stale-while-revalidate=25",
+    },
+  });
+};
+```
+
+The API route increments the view count for the specified `slug` and returns the updated count in a similar way to the `ViewCounter` component created earlier. We can now create a client-side component to fetch the view count from the API route using the `fetch` API and a framework integration like Svelte.
+
+We can set up Astro along with Svelte to fetch the view count from the API route using the official [Svelte integration](https://docs.astro.build/en/guides/integrations-guide/svelte/). 
+
+Once set up, we can create a new Svelte component to fetch the view count from the API route.
+
+```svelte title="src/components/ViewCounter.svelte"
+<script>
+  export let slug;
+  const fetchImage = (async () => {
+    const response = await fetch("/api/views?" + new URLSearchParams({ slug }));
+    return await response.json();
+  })();
+</script>
+
+{#await fetchImage then data}
+  <span>{data.count}</span>
+{:catch}
+  <span>1</span>
+{/await}
+```
+
+Finally, you can use the `ViewCounter` component in your Astro template.
+
+```astro title="pages/blog/[slug].astro"
+---
+// [!code word:client\:only]
+import ViewCounter from '@/components/ViewCounter.svelte';
+const slug = Astro.params.slug;
+---
+
+<article>
+  <h1>{slug}</h1>
+  <ViewCounter client:only slug={slug} />
+  <p>Post content goes here</p>
+</article>
+```
+
+The `client:only` directive ensures that the component is only rendered on the client side, allowing the view count to be updated without delays in server-side rendering.
+
+## Wrap Up.
+
+As you can see, it's very easy to build data driven components with Astro DB. The `ViewCounter` component is a simple example of how you can use Astro DB to build more interactive and dynamic components without relying on a third-party service like third part CMS solutions. 
+You can use the same approach to build other data-driven components, such as comments, likes, or social interaction counters widgets and more.
+

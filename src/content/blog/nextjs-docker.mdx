@@ -9,6 +9,7 @@
   }
   categories: ['docker', "nextjs", "javascript"]
   description: 'Build and deploy a Next.js application using Docker.'
+  metaDescription: 'Learn how to containerize a Next.js application using Docker and automate your deployments with GitHub Actions.'
 ---
 
 <Note>The code for this tutorial is available on [GitHub](https://github.com/vorillaz/website/tree/main/examples/docker-nextjs-app)</Note>
@@ -45,8 +46,7 @@ First things first, you need to ensure that you have [Docker installed](https://
   
 
 ```bash
-
-❏ ~ docker info
+~ docker info
 
 Client:
 	Version: 24.0.7
@@ -72,7 +72,7 @@ Next.js can automatically create a standalone folder that copies only the necess
 
   
 
-```js
+```js title="next.config.js"
 
 /** @type {import('next').NextConfig} */
 module.exports = {
@@ -91,8 +91,7 @@ module.exports = {
 We need to create a `.dockerignore` file as we don't want to increase the size of our docker image with unnecessary files tranfered to the container. You can create a `.dockerignore` file in the root of your project and add the following content:
 
 
-```bash title=".dockerignore"
-
+```docker title=".dockerignore"
 .dockerignore
 
 # Not needed as we are bundling the whole app
@@ -125,13 +124,9 @@ You can now create a Dockerfile that describes how your image gets built. We are
 ```docker title="Dockerfile"
 FROM node:20-alpine AS base
 
-  
-
 ### Dependencies ###
 FROM base AS deps
 RUN apk add --no-cache libc6-compat git
-
-  
 
 # Setup pnpm environment
 ENV PNPM_HOME="/pnpm"
@@ -214,7 +209,7 @@ If you followed along this tutorial, you are now ready to build your Next.js app
 Head to your terminal and build your image by running:
 
 ```bash
-❏ ~ docker build -t my-nextjs-docker .
+~ docker build -t my-nextjs-docker .
 ```
 
   
@@ -222,7 +217,7 @@ Head to your terminal and build your image by running:
 Once done, you may try to rerun the building process and obtain the building logs, you will see that all the steps are internally cached and the building process just takes a few seconds.
 
 ```bash {9-11}
-❏ ~ docker build -t my-nextjs-docker .
+~ docker build -t my-nextjs-docker .
 
 [+] Building 2.6s (25/25) FINISHED docker:orbstack
 => [internal] load build definition from Dockerfile 0.0s
@@ -239,8 +234,7 @@ Once done, you may try to rerun the building process and obtain the building log
 You can also find out the building details about your image by using the `docker images` command.
 
 ```bash
-
-❏ ~ docker images my-nextjs-docker
+~ docker images my-nextjs-docker
 
 REPOSITORY TAG IMAGE ID CREATED SIZE
 --
@@ -252,22 +246,20 @@ my-nextjs-docker latest 09462a81711b 14 hours ago 155MB
 Now it's time to finally start our container, we need to bind port 3000 to our container and spin up the image.
 
 ```bash
-❏ ~ docker run -p 3000:3000 my-nextjs-docker
+~ docker run -p 3000:3000 my-nextjs-docker
 ```
 
   
 
 The output in your terminal will show you that the application is running.
 
-```bash
+```bash 
+~ docker run -p 3000:3000 my-nextjs-docker
 
-❏ ~ docker run -p 3000:3000 my-nextjs-docker
-
-  ▲ Next.js 14.0.4
-  - Local: http://localhost:3000
-  - Network: http://0.0.0.0:3000
-  ✓ Ready in 39ms
-
+▲ Next.js 14.0.4
+- Local: http://localhost:3000
+- Network: http://0.0.0.0:3000
+✓ Ready in 39ms
 ```
 
 
@@ -280,22 +272,21 @@ Next.js offers a reliable way for managing environmental variables through `.env
 So, first things first, we need to create three sample files, one for each deployment envinronment (`dev`, `staging`, `production`).
 
 ```bash
-❏ ~ touch .env.local.sample .env.production.sample .env.staging.sample
+~ touch .env.local.sample .env.production.sample .env.staging.sample
 ```
 
 
 You can now add a variable inside each file.
 
-```bash
-MY_ENV=This is my production envinronment variable
+```tfvars
+MY_ENV="This is my production envinronment variable"
 ```
 
   
 
 And display that value in your Next.js landing page:
 
-```tsx
-
+```tsx title="pages/index.tsx"
 export default function Home() {
   return (
     <div className={styles.description}>
@@ -311,7 +302,7 @@ Then we need to copy the sample `.env` files into our image. To achieve this, we
 
 For the first step, let's declare an argument called `SETUP_ENVINROMENT`. This argument is set to `production` by default.
 
-```dockerfile
+```dockerfile title="Dockerfile"
 FROM node:20-alpine AS base
 ARG SETUP_ENVINROMENT=production
 ```
@@ -320,8 +311,7 @@ ARG SETUP_ENVINROMENT=production
 
 Then for the `builder` step we will use the `SETUP_ARGUMENT`, copy and rename the appropriate `.env` file.
 
-```docker
-
+```docker title="Dockerfile"
 FROM base AS builder
 RUN corepack enable
 RUN corepack prepare pnpm@latest --activate
@@ -335,8 +325,8 @@ COPY .env.$SETUP_ENVINROMENT.sample .env
 You can try to build separate images for each deployment envinroment, try to also change the `MY_ENV` variable and rerun each container.
 
 ```bash
-❏ ~ echo Building staging env
-❏ ~ docker build --build-arg SETUP_ENVINROMENT=staging --tag my-app-docker-staging .
+~ echo Building staging env
+~ docker build --build-arg SETUP_ENVINROMENT=staging --tag my-app-docker-staging .
 ```
 
 ### Create a CI/CD Pipeline
@@ -361,7 +351,6 @@ Once completed, you can proceed to your GitHub repository and create a new file 
 
 ```yaml title="./github/workflows/release.yml"
 name: Build and Publish Docker image
-
 on:
   push:
     branches: [main]

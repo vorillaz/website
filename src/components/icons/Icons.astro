@@ -1,0 +1,51 @@
+---
+import Go from "./Go.astro";
+import Js from "./Jss.astro";
+import Ts from "./Ts.astro";
+import Vue from "./Vue.astro";
+import React from "./React.astro";
+import Svelte from "./Svelte.astro";
+import Json from "./Json.astro";
+import Docker from "./Docker.astro";
+import AstroIcon from "./Astro.astro";
+import Next from "./Nextjs.astro";
+import Sql from "./Sql.astro";
+
+const icons = {
+  go: Go,
+  js: Js,
+  javascript: Js,
+  ts: Ts,
+  typescript: Ts,
+  vue: Vue,
+  react: React,
+  svelte: Svelte,
+  json: Json,
+  docker: Docker,
+  astro: AstroIcon,
+  sql: Sql,
+  next: Next,
+  nextjs: Next,
+};
+
+interface Props {
+  icon?: string;
+}
+
+const { icon } = Astro.props;
+
+const getIcon = (icon?: string) => {
+  if (!icon) return null;
+  return icons[icon] || null;
+};
+
+const Icon = getIcon(icon);
+---
+
+{
+  Icon && (
+    <span class="big-icon">
+      <Icon />
+    </span>
+  )
+}

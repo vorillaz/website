@@ -1,0 +1,23 @@
+---
+import { getTalks } from "@/lib/talks";
+import SingleLayout from "@/layouts/SingleLayout.astro";
+import Upcoming from "../components/talks/Upcoming.astro";
+import Past from "../components/talks/Past.astro";
+
+const { upcoming, past } = await getTalks();
+---
+
+<SingleLayout title="Speaking">
+  <h1>Speaking.</h1>
+  <p>
+    I am quite involved with technical speaking and I am constantly looking for
+    opportunities to share my knowledge and experiences with others. I have
+    spoken at various conferences, meetups, and workshops. If you are interested
+    in having me speak at your event, please feel free to reach out to me.
+  </p>
+  <p>Below is a list of my upcoming and past speaking engagements.</p>
+  <!-- Upcoming -->
+  <Upcoming talks={upcoming} />
+  <!-- Past -->
+  <Past past={past} />
+</SingleLayout>

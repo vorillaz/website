@@ -1,7 +1,15 @@
 ---
-import { getArt } from "../lib/posts";
-import ArtListing from "@/components/ArtListing.astro";
+import { type CollectionEntry } from "astro:content";
+import { getArt, getSortedPosts } from "@/lib/posts";
+import Posts from "@/components/Posts.astro";
+
+export const prerender = true;
+
 const art = await getArt();
+const sortedPosts = getSortedPosts(art);
 ---
 
-<ArtListing posts={art} />
+<Posts
+  paginatedPosts={sortedPosts as CollectionEntry<"generative">[]}
+  title="Art."
+/>

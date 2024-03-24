@@ -8,16 +8,13 @@ export const GET: APIRoute = async ({ request }) => {
 
   const data = {
     title: params.get("title"),
-    description: params.get("description"),
   };
 
-  const { title, description } = data;
+  const { title } = data;
 
-  console.log(description, "description");
   return new Response(
     await ogImage({
       title: title as string,
-      description: description as string,
     }),
     {
       headers: { "Content-Type": "image/png" },

@@ -1,0 +1,14 @@
+---
+import Eye from "./icons/Eye.astro";
+import FetchViews from "./FetchViews.svelte";
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+---
+
+<span class="flex gap-half">
+  <Eye />
+  <FetchViews client:only slug={slug} />
+</span>
