@@ -1,6 +1,4 @@
 function domCopy(text: string) {
-  // Create a new DOM element to copy from and append it to the document,
-  // but make sure it's not visible and does not cause reflow
   const pre = document.createElement("pre");
   Object.assign(pre.style, {
     opacity: "0",
@@ -18,7 +16,6 @@ function domCopy(text: string) {
   pre.textContent = text;
   document.body.appendChild(pre);
 
-  // Select the DOM element's contents
   const range = document.createRange();
   range.selectNode(pre);
   const selection = getSelection();
@@ -26,7 +23,6 @@ function domCopy(text: string) {
   selection.removeAllRanges();
   selection.addRange(range);
 
-  // Copy the selection to the clipboard
   let ok = false;
   try {
     ok = document.execCommand("copy");
@@ -37,23 +33,16 @@ function domCopy(text: string) {
   return ok;
 }
 
-/**
- * Function to handle clicks on a single copy button.
- */
 async function clickHandler(event: Event) {
-  // Attempt to perform the copy operation, first using the Clipboard API,
-  // and then falling back to a DOM-based approach
   const button = event.currentTarget as HTMLButtonElement;
   const dataset = button.dataset as { code: string; copied: string };
   const code = dataset.code.replace(/\u007f/g, "\n");
   try {
     await navigator.clipboard.writeText(code);
   } catch (err) {
-    alert("Failed to copy code to clipboard. Trying alternative method.");
     domCopy(code);
   }
 
-  // Show feedback tooltip
   let checkmark: HTMLSpanElement | null = button.querySelector(
     ".copy-code-checkmark"
   );
@@ -82,10 +71,8 @@ const initButtons = (container: ParentNode | Document) => {
     .forEach((btn) => btn.addEventListener("click", clickHandler));
 };
 
-// Use the function to initialize all buttons that exist right now
 initButtons(document);
 
-// Register a MutationObserver to initialize any new buttons added later
 const newButtonsObserver = new MutationObserver((mutations) =>
   mutations.forEach((mutation) =>
     mutation.addedNodes.forEach((node) => {
