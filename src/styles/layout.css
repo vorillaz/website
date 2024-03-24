@@ -282,3 +282,12 @@ select {
     transform: scaleY(1);
   }
 }
+
+
+[data-toggle-menu] {
+  display: none;
+}
+
+.submenu {
+  display: none;
+}

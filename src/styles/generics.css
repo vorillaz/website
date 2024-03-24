@@ -145,6 +145,21 @@ body {
   color: var(--subfaded-text);
 }
 
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-x-hidden {
+  overflow-x: hidden;
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
+.bg-page {
+  background-color: var(--bg);
+}
 /* Utilities */
 [hidden],
 template {

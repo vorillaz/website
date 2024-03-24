@@ -1,5 +1,7 @@
 ---
 import Logo from "./Logo.astro";
+import ToggleMenu from "./ToggleMenu.astro";
+
 const { isPost } = Astro.props;
 const isSelected = (assertion) => {
   if (assertion) {
@@ -12,24 +14,52 @@ const url = Astro.url;
 const { pathname } = url;
 ---
 
-<header class="nav wrap center">
+<header class="nav wrap center" id="header">
   <a class="logo" href="/">
     <Logo />
   </a>
   <div class="flex gap-2 center">
-    <ul class="menu">
-      <li class={isSelected(pathname === "/about")}>
-        <a href="/about"><span>About</span></a>
-      </li>
-      <li class={isSelected(pathname === "/posts" || isPost)}>
-        <a href="/posts"><span>Blog</span></a>
-      </li>
-      <li class={isSelected(pathname === "/projects")}>
-        <a href="/projects"><span>Projects</span></a>
-      </li>
-      <li class={isSelected(pathname === "/talks")}>
-        <a href="/talks"><span>Speaking</span></a>
-      </li>
-    </ul>
+    <div id="nav">
+      <ul class="menu">
+        <li class={isSelected(pathname === "/about")}>
+          <a href="/about"><span>About</span></a>
+        </li>
+        <li class={isSelected(pathname === "/posts" || isPost)}>
+          <a href="/posts"><span>Blog</span></a>
+        </li>
+        <li class={isSelected(pathname === "/projects")}>
+          <a href="/projects"><span>Projects</span></a>
+        </li>
+        <li class={isSelected(pathname === "/talks")}>
+          <a href="/talks"><span>Speaking</span></a>
+        </li>
+      </ul>
+      <div class="submenu">
+        <a
+          href="https://twitter.com/vorillaz"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          X
+        </a>
+        <span class="dot"></span>
+        <a
+          href="https://github.com/vorillaz"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub
+        </a>
+        <span class="dot"></span>
+        <a
+          href="https://dev.to/vorillaz"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Dev.to
+        </a>
+      </div>
+    </div>
+    <ToggleMenu />
   </div>
 </header>
