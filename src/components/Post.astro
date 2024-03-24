@@ -18,10 +18,12 @@ const {
   title,
   heroImage,
   imgCredits,
+  metaDescription,
   pubDate,
   updatedDate,
   description,
   categories,
+  keywords,
   prompt,
   heroImageGenerator,
 } = post.data;
@@ -30,7 +32,12 @@ const pubstr = pubDate.toISOString();
 const updatedstr = updatedDate?.toISOString();
 ---
 
-<PostLayout title={title} description={description}>
+<PostLayout
+  title={title}
+  description={description}
+  keywords={keywords}
+  metaDescription={metaDescription}
+>
   <article id="article" role="article" class="content">
     <h1 transition:name={slugify(title)} class="post-title">{title}</h1>
     <!-- Date and time -->

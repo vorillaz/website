@@ -6,11 +6,24 @@ interface Props {
   isArt?: boolean;
   title: string;
   description?: string;
+  metaDescription?: string;
+  keywords?: string[];
 }
-const { title, description, isArt = false } = Astro.props;
+const {
+  title,
+  description,
+  isArt = false,
+  metaDescription,
+  keywords,
+} = Astro.props;
 ---
 
-<Layout title={title} description={description}>
+<Layout
+  title={title}
+  description={description}
+  metaDescription={metaDescription}
+  keywords={keywords}
+>
   <Header isPost={!isArt} />
   <main class="wrap">
     <slot />

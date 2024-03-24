@@ -47,6 +47,7 @@ const blog = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
+    metaDescription: z.string().optional(),
     heroImage: z.string().optional(),
     prompt: z.string().optional(),
     heroImageGenerator: z.enum(["unsplash", "midjourney"]).optional(),
