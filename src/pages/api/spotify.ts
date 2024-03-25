@@ -40,8 +40,7 @@ export const getNowPlaying = async () => {
 
     return response;
   } catch (error) {
-    console.error(error);
-    return null;
+    throw new Error("Failed to fetch now playing data");
   }
 };
 
@@ -49,26 +48,32 @@ export const GET: APIRoute = async () => {
   try {
     const response = await getNowPlaying();
     if (!response) {
-      return new Response(JSON.stringify({ isPlaying: false }), {
-        status: 500,
-        headers: {
-          "content-type": "application/json",
-        },
-      });
+      return new Response(
+        JSON.stringify({ isPlaying: false, error: "Failed to match response" }),
+        {
+          status: 500,
+          headers: {
+            "content-type": "application/json",
+          },
+        }
+      );
     }
     if (response.status === 204 || response.status > 400) {
-      return new Response(JSON.stringify({ isPlaying: false }), {
-        status: 200,
-        headers: {
-          "content-type": "application/json",
-        },
-      });
+      return new Response(
+        JSON.stringify({ isPlaying: false, error: "Not authorized" }),
+        {
+          status: 200,
+          headers: {
+            "content-type": "application/json",
+          },
+        }
+      );
     }
 
     const song = await response.json();
 
     if (song.item === null) {
-      return new Response(JSON.stringify({ isPlaying: false }), {
+      return new Response(JSON.stringify({ isPlaying: false, noSong: true }), {
         status: 200,
         headers: {
           "content-type": "application/json",
