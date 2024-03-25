@@ -103,7 +103,9 @@ export const GET: APIRoute = async () => {
         status: 200,
         headers: {
           "content-type": "application/json",
-          "cache-control": "no-store, max-age=0",
+          // add cache control to prevent re-fetching the same song
+          "cache-control":
+            "public, max-age=60, s-maxage=60, stale-while-revalidate=60",
         },
       }
     );
