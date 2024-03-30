@@ -1,9 +1,9 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import { slugify } from "@/lib/utils";
-import { Image } from "astro:assets";
 import PostLayout from "@/layouts/PostLayout.astro";
 import Note from "./Note.astro";
+import Img from "./Img.astro";
 import Code from "./CodeHeader.astro";
 import PostViews from "./PostViews.astro";
 import InlineCode from "./InlineCode.astro";
@@ -80,30 +80,12 @@ const updatedstr = updatedDate?.toISOString();
       }
     </div>
     <>
-      {
-        heroImage && (
-          <figure>
-            <Image
-              src={heroImage}
-              width={1000}
-              height={500}
-              quality={100}
-              format="jpg"
-              loading="eager"
-              alt={`img of ${title}`}
-            />
-            {imgCredits && (
-              <figcaption class="small-text">
-                Image Credits: {imgCredits.url}
-              </figcaption>
-            )}
-          </figure>
-        )
-      }
+      {heroImage && <Img src={heroImage} alt={title} credits={imgCredits} />}
     </>
     <Content
       components={{
         Note,
+        img: Img,
         "custom-code-renderer": Code,
         "inline-code": InlineCode,
       }}

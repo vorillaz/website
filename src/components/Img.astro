@@ -1,0 +1,33 @@
+---
+import { Image } from "astro:assets";
+interface Props {
+  src: string;
+  alt?: string;
+  title?: string;
+  credits?: {
+    username?: string;
+    url?: string;
+  };
+}
+
+const { src, alt, credits, title } = Astro.props;
+---
+
+<figure>
+  <Image
+    src={src}
+    width={1000}
+    height={500}
+    quality={100}
+    title={title ?? ""}
+    decoding="async"
+    loading="lazy"
+    format="jpg"
+    alt={alt ?? ""}
+  />
+  {
+    credits && (
+      <figcaption class="small-text">Image Credits: {credits.url}</figcaption>
+    )
+  }
+</figure>

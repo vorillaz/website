@@ -77,6 +77,13 @@
   overflow: hidden;
   align-items: center;
   justify-content: center;
+  
+}
+
+/* force color for img svgs*/
+.content figure embed, 
+.content figure img {
+  color: var(--text);
 }
 
 .content > figure > img,

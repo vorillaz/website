@@ -1,7 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import { slugify } from "@/lib/utils";
-import { Image } from "astro:assets";
+import Img from "./Img.astro";
 import Note from "./Note.astro";
 import Code from "./CodeHeader.astro";
 import PostLayout from "@/layouts/PostLayout.astro";
@@ -53,25 +53,12 @@ const updatedstr = updatedDate?.toISOString();
       <PostViews slug={post.slug} />
     </p>
     <>
-      {
-        heroImage && (
-          <figure>
-            <Image
-              src={heroImage}
-              width={1000}
-              height={500}
-              quality={100}
-              format="jpg"
-              loading="eager"
-              alt={`img of ${title}`}
-            />
-          </figure>
-        )
-      }
+      {heroImage && <Img src={heroImage} alt={`img of ${title}`} />}
     </>
     <Content
       components={{
         Note,
+        img: Img,
         "custom-code-renderer": Code,
         "inline-code": InlineCode,
       }}
