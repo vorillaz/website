@@ -1,0 +1,294 @@
+---
+title: Next.js with Public Environment Variables in Docker
+pubDate: Apr 01 2024
+status: published
+heroImage: '/imgs/docker-env.png'
+categories:
+  - javascript
+  - typescript
+  - nextjs
+  - docker
+heroImageGenerator: midjourney
+prompt: 'A black whale photo on a billboard on top of a brutalistic building, raw photo, detailed, dusty snap shooting, 70s film style,dusty, dirty colors, mood is 1970s in Berlin, adding organic shapes to the geometric environment UHD resolution --style raw --stylize 600 --ar 16:9'
+description: "How to build and run a Next.js Docker image with client accessible envinroment variables"
+metaDescription: "Learn how to build and run a Next.js Docker image with client accessible envinroment variables using the app router."
+---
+
+<Note>The code for this guide is available on [GitHub](https://github.com/vorillaz/tutorials/tree/main/docker-nextjs-env)</Note>
+
+In my previous guide [on containerizing Next.js apps](/nextjs-docker), we encountered a notable challenge. Next.js offers two ways to handle environment variables:
+
+1. Variables accessible in the browser, prefixed with `NEXT_PUBLIC_`, are bundled during the build process, inlined and included in the client-side code.
+2. Variables without this prefix, such as `MYVAR=1`, are only accessible to server-rendered components and API routes.
+
+This distinction complicates the creation of a Docker image for Next.js apps that require dynamic, browser-accessible environment variables. When using an `.env` file during the Docker build, the variables are statically included in the image, losing their dynamic nature. This is a limitation coming up from the deployment models of platforms like Vercel, which build and deploy code on-the-fly, unlike the pre-packaged approach required for Docker.
+
+## The Quick and Dirty Solution.
+
+Given a `.env.local` file with several variables, we can expose these through an API route. This method bypasses the need for the `NEXT_PUBLIC_` prefix convention.
+
+```ini title=".env.local"
+DOCKER_MY_ENV=hello
+DOCKER_ANOTHER_ENV=world
+```
+
+We can then create an API route to serve these values:
+
+```ts title="app/env/route.ts"
+// Disable caching
+export const dynamic = "force-dynamic";
+export async function GET(request: Request) {
+  const env = {
+    DOCKER_MY_ENV: process.env.DOCKER_MY_ENV,
+    DOCKER_ANOTHER_ENV: process.env.DOCKER_ANOTHER_ENV,
+  };
+  return Response.json(env);
+}
+```
+
+Client components can fetch and display these values as follows:
+
+```tsx title="components/fetch-env.tsx"
+"use client";
+import { useState, useEffect } from "react";
+
+export const MyFetchComponent = () => {
+  const [env, setEnv] = useState({});
+
+  useEffect(() => {
+    fetch("/env")
+      .then((res) => res.json())
+      .then((data) => setEnv(data));
+  }, []);
+
+  return (
+    <div>
+      <pre>{JSON.stringify(env, null, 2)}</pre>
+    </div>
+  );
+};
+```
+
+## A More Consistent Approach.
+
+While the above solution is functional, it includes an additional network request and it's not that versatile. A more seamless integrations involves passing variables from server components to client React components through a context provider.
+
+First, define and export the environment variables using a helper function:
+
+```tsx title="env/env.ts"
+"use server";
+export const getEnv = async () => ({
+  DOCKER_MY_ENV: process.env.DOCKER_MY_ENV,
+  DOCKER_ANOTHER_ENV: process.env.DOCKER_ANOTHER_ENV,
+  DOCKER_MY_INT: process.env.DOCKER_MY_INT,
+  DOCKER_MY_URL: process.env.DOCKER_MY_URL,
+  NEXT_PUBLIC_ANALYTICS_ID: process.env.NEXT_PUBLIC_ANALYTICS_ID,
+});
+```
+
+The `"use server"` directive will mark the call as a server-side function, in order to consume the helper in a Next.js layout the call should be asynchronous.
+
+Next, create a context provider component:
+
+```tsx title="env/provider.tsx"
+"use client";
+import { createContext, useContext, useEffect, useState } from "react";
+import { getEnv } from "./env";
+
+export const EnvContext = createContext({});
+
+export const EnvProvider = ({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) => {
+  const [env, setEnv] = useState({});
+
+  useEffect(() => {
+    getEnv().then((env) => {
+      setEnv(env);
+    });
+  }, []);
+  return <EnvContext.Provider value={env}>{children}</EnvContext.Provider>;
+};
+
+export const useEnv = () => {
+  return useContext(EnvContext);
+};
+```
+
+The `"use client"` directive is mandatory in order to keep track of any state changes. using the `useState` hook. Upon mounting the provider will retrieve the values from the `getEnv()` method and initialise the context.
+
+Finally wrap your page contents with the `<EnvProvider />` component:
+
+```tsx title="app/layout.tsx"
+import { EnvProvider } from "@/env/provider";
+
+export default async function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body>
+        <EnvProvider>{children}</EnvProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+Client components can now access the environment variables:
+
+```tsx title="components/example.tsx"
+"use client";
+import { useEnv } from "@/env/provider";
+
+export const MyClientComponent = () => {
+  const env = useEnv();
+
+  return (
+    <div>
+      <h1>This is rendered in a client component.</h1>
+      <pre
+        style={{
+          padding: "1rem",
+          backgroundColor: "#f4f4f4",
+          border: "1px solid #ccc",
+          borderRadius: "5px",
+          margin: "1rem 0",
+        }}
+      >
+        {JSON.stringify(env, null, 2)}
+      </pre>
+    </div>
+  );
+};
+```
+
+## Building and Running the Docker Image.
+
+Modify the [Dockerfile](https://github.com/vorillaz/tutorials/blob/main/docker-nextjs-app/Dockerfile) from the previous tutorial by removing the environment variable bundling. Here's how to build and run the image:
+
+```dockerfile title="Dockerfile"
+FROM node:20-alpine AS base
+
+# --- Dependencies ---
+### Rebuild deps only when needed ###
+FROM base AS deps
+RUN apk add --no-cache libc6-compat git
+
+RUN echo Building nextjs image with corepack
+
+# Setup pnpm environment
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+RUN corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile --prefer-frozen-lockfile
+
+# --- Builder ---
+FROM base AS builder
+RUN corepack enable
+RUN corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN pnpm build
+
+# --- Production runner ---
+FROM base AS runner
+# Set NODE_ENV to production
+ENV NODE_ENV production
+
+# Disable Next.js telemetry
+# Learn more here: https://nextjs.org/telemetry
+ENV NEXT_TELEMETRY_DISABLED 1
+
+# Set correct permissions for nextjs user
+# Don't run as root
+RUN addgroup nodejs
+RUN adduser -SDH nextjs
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+USER nextjs
+
+# Expose ports (for orchestrators and dynamic reverse proxies)
+EXPOSE 3000
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
+
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "wget", "-q0", "http://localhost:3000/health" ]
+
+# Run the nextjs app
+CMD ["node", "server.js"]
+```
+
+Here's how to build and run the image:
+
+```bash
+~ echo Building image
+~ docker build --tag my-app-docker-env .
+```
+
+Run the application with a local `.env` file:
+
+```bash
+docker run -p 3000:3000 --env-file .env.local my-app-docker-env
+
+ ▲ Next.js 14.1.4
+   - Local:        http://localhost:3000
+   - Network:      http://0.0.0.0:3000
+
+ ✓ Ready in 34ms
+```
+
+Test by stopping the container, modifying `.env.local`, and restarting the application.
+
+## Enhancing Security.
+
+To further secure your environment variables, consider using [envsafe](https://github.com/KATT/envsafe) for validation and type safety. Install the package and adjust the `env/env.ts` file accordingly along with the variable types:
+
+```bash
+pnpm add envsafe
+```
+
+```tsx title="env/env.ts"
+"use server";
+import { envsafe, str } from "envsafe";
+
+export const getEnv = async () =>
+  envsafe({
+    DOCKER_MY_ENV: str(),
+    DOCKER_ANOTHER_ENV: str(),
+    DOCKER_MY_INT: str(),
+    DOCKER_MY_URL: str(),
+  });
+```
+
+## Wrap up.
+
+In conclusion, managing public environment variables in a Dockerized Next.js application requires a little effort to keep up with their dynamic nature. We explored two primary methods: serving variables through a Next.js API route and a more seamless integration using a context provider to pass variables from server components to client components. The latter approach, while slightly more complex, offers a more consistent and versatile solution. Finally, we covered the necessary changes to the Dockerfile to accommodate both strategies and highlighted the importance of security and type safety with tools like `envsafe`.
+
+## References
+
+- [Next.js Docker Example](https://github.com/vercel/next.js/tree/canary/examples/with-docker)
+- [Docker Documentation](https://docs.docker.com/)
+- [Envinroment Variables with Next.js](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables)
+- [Dockerfile Reference](https://docs.docker.com/engine/reference/builder/)
+- [Docker Hub](https://hub.docker.com/)
+- [Next.js Discussion](https://github.com/vercel/next.js/discussions/17641#discussioncomment-8921834)
