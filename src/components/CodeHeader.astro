@@ -3,6 +3,7 @@ import Go from "./icons/Go.astro";
 import Js from "./icons/Jss.astro";
 import Ts from "./icons/Ts.astro";
 import Vue from "./icons/Vue.astro";
+import EnvIcon from "./icons/Env.astro";
 import React from "./icons/React.astro";
 import Svelte from "./icons/Svelte.astro";
 import Json from "./icons/Json.astro";
@@ -17,7 +18,10 @@ import Check from "./icons/Check.astro";
 const props = Astro.props;
 const { lang, langName, code, title } = props;
 
-const getComponent = (lang) => {
+const getComponent = (lang, title) => {
+  if (title?.includes(".env")) {
+    return EnvIcon;
+  }
   switch (lang) {
     case "go":
       return Go;
@@ -52,7 +56,7 @@ const getComponent = (lang) => {
   }
 };
 
-const IconLang = getComponent(lang);
+const IconLang = getComponent(lang, title);
 ---
 
 <div class="code-header flex space-between center px-1">
