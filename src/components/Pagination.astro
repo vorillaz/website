@@ -16,19 +16,19 @@ const next = currentPage < totalPages ? "" : "disabled";
   {
     totalPages > 1 && (
       <nav aria-label="Pagination" class="flex gap-1 small-text">
-        {
-          <a
-            aria-disabled={prev === "disabled"}
-            href={prevUrl}
-            aria-label="Previous"
-          >
+        {prev === "disabled" && <span aria-disabled>Previous</span>}
+        {prev !== "disabled" && (
+          <a aria-label="Previous">
             <span>Previous</span>
           </a>
-        }
+        )}
         {currentPage} / {totalPages}
-        <a aria-disabled={next === "disabled"} href={nextUrl} aria-label="Next">
-          <span>Next</span>
-        </a>
+        {next === "disabled" && <span aria-disabled>Next</span>}
+        {next !== "disabled" && (
+          <a href={nextUrl} aria-label="Next">
+            <span>Next</span>
+          </a>
+        )}
       </nav>
     )
   }
