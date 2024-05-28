@@ -14,7 +14,9 @@ export async function getTalks(): Promise<{
     (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
   );
 
-  const upcoming = talks.filter((talk) => talk.data.upcoming);
+  const upcoming = talks
+    .filter((talk) => talk.data.upcoming)
+    .sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf());
   const p = talks.filter((talk) => !talk.data.upcoming);
 
   const past = p.reduce((acc: PastTalks[], talk) => {
