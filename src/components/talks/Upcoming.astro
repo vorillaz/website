@@ -18,9 +18,11 @@ const { talks } = Astro.props;
               <div>{talk.data.title}</div>
               <div class="flex center gap-1 center">
                 <span class="flex gap">
-                  <span class="badge">
-                    <a href="https://jsheroes.io/">Tickets</a>
-                  </span>
+                  {talk?.data?.ticketUrl && (
+                    <span class="badge">
+                      <a href={talk.data.ticketUrl}>Tickets</a>
+                    </span>
+                  )}
                   <span class="badge">{talk.data.lang}</span>
                 </span>
                 <span class="faded small-text">

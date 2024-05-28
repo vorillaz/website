@@ -11,6 +11,8 @@ const talks = defineCollection({
     conference: z.string().optional(),
     previewVideoUrl: z.string().optional(),
     videoUrl: z.string().optional(),
+    ticketUrl: z.string().optional(),
+    slides: z.string().optional(),
     lang: z.enum(["en", "gr"]).optional(),
   }),
 });
