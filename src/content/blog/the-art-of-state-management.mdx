@@ -28,7 +28,7 @@ Since we want to ensure that our application is as performant as possible and sc
 
 ## Selectors.
 
-Selectors are pure functions that can compute derived data. This concept is heavily inspired by Reselect, a library commonly used along with Redux. Selectors can get chained and manipulate or retrieve parts of the state.
+Selectors are pure functions that can compute derived data. This concept is heavily inspired by `reselect`, a library commonly used along with Redux. Selectors can get chained and manipulate or retrieve parts of the state.
 
 In a really simple example where our state stores a list of todo tasks we can use selectors to apply changes on the state.
 
@@ -92,7 +92,7 @@ export default createContext(null);
 
 Keep in mind that the `defaultValue` argument is only used when a component does not have a matching Provider above it in the tree.
 
-Next up we are going to create our `TodoProvider`. Every Context object comes with a Provider React component that allows consuming components to subscribe to context changes. Inside a file called `provider.js`, we will create the Provider component.
+Next up we are going to create our `TodoProvider`. Every `Context` object comes with a Provider component that allows child components to subscribe to context changes. Inside a file called `provider.js`, we will create the `Provider` component.
 
 ```javascript title="provider.js"
 import React, {useState, useCallback} from 'react';
@@ -106,11 +106,11 @@ const TodoProvider = ({children}) => {
 export default TodoProvider;
 ```
 
-In the code above we have created and exposed a new React component THAT consumes the `useState` hook to properly store our Todo list. We also imported the `TodosContext` and wrapped the output rendering with the `TodosContext.Provider` component where we are also passing through the stateful value and the state updater as the `value` property. Keep in mind that we are using the `value` with an array as this is the only way to pass a value deep into the component tree without explicitly wiring it through every component. As an extra performance-enhancing technique, the state updater is also wrapped with `useCallback` in to memoize the footprint of the function.
+In the code above we have created and exposed a new React component that consumes the `useState` hook to properly store our todos list. We also imported the `TodosContext` and wrapped the output rendering with the `TodosContext.Provider` component where we are also passing through the stateful value and the state updater as the `value` property. Keep in mind that we are using the `value` with an array as this is the only way to pass a value deep into the component tree without explicitly wiring it through every component. As an extra performance-enhancing technique, the state updater is also wrapped with `useCallback` in to memoize the footprint of the function.
 
 ## The Main Application.
 
-Next up we need to wrap our application with the `TodosProvider`, it's a good practice to add the Providers as higher as possible into the component's rendering tree. Also, we will add a `TodoList` component to render our todo items into a list.
+Next up, we need to wrap our application with the `TodosProvider`, it's a good practice to add the providers as high as possible in the rendering tree. Also, we will add a `TodoList` component to render our todo items into a list.
 
 ```javascript title="app.js"
 import React from 'react';
@@ -159,7 +159,7 @@ import {useContextSelector} from 'use-context-selector';
 const todos = useContextSelector(Ctx, ([todos, update]) => todos);
 ```
 
-As we have discussed before the `TodosProvider` has a `value` property holding the actual state reference and the state updater, thus we can retrieve and return the first item of the passed through property. In the same manner, we can also create the callback for our button which adds new items to the list.
+As we have discussed before, the `TodosProvider` has a `value` property holding the actual state reference and the state updater, thus we can retrieve and return the first item of the passed through property. In the same manner, we can also create the callback for our button which adds new items to the list.
 
 ```javascript
 const update = useContextSelector(Ctx, ([state, update]) => update);
@@ -300,7 +300,7 @@ const TodoProvider = ({children}) => {
 
 ## Going "Wild".
 
-Practicing the compassable selectors' approach we can even combine data from more than one Providers. Although you are highly advised to avoid this path, since you may introduce performance bottlenecks or even inconsistencies across the stored data, in some really rare cases that pattern might be useful.
+Practicing the compassable selectors' approach we can even combine data from more than one provider. Although, you are highly advised to avoid this path since you may introduce performance bottlenecks or even inconsistencies across the stored data, in some really rare cases that pattern might be useful.
 
 ```javascript title="useMultipleCtxSelector.js"
 export const useMultipleCtxSelector = ([...Contexts], selector) => {
@@ -312,11 +312,13 @@ export const useMultipleCtxSelector = ([...Contexts], selector) => {
 };
 ```
 
-In the code above we are merging the data from the passed through Contexts and apply the `useContextSelector` hook on a fresh Context created inside the hooks. Keep in mind, that this technique violates the the Hooks concept since `useContextSelector` has been used inside a loop.
+In the code above we are merging the data from the passed through contexts and apply the `useContextSelector` hook on a fresh data instance created inside the hooks. Keep in mind, that this technique violates the the hooks concept since `useContextSelector` has been used inside a loop.
 
 ## Final Thoughts.
 
-Although the techniques and methodologies described in this tutorial might look a bit overwhelming, complicated or even redundant since Redux has been a community standard I found out it can mature properly, especially for production-grade projects where state management grows by the time. Selectors are great since we can isolate them, compose them and make our components aware of state changes with minimal boilerplate code.
+Although the techniques and methodologies described in this tutorial might look a bit overwhelming, complicated or even redundant since Redux has been a community standard, I found out it can mature properly, especially for production-grade projects where state management grows by the time. 
+
+Selectors are great since we can isolate them, compose them and make our components aware of state changes with minimal boilerplate code.
 
 Furthermore, performance-wise, we can limit down unnecessary DOM updates due to lack of architectural decisions, I have found out that using the Context API along with selectors we can also create huge forms with controlled inputs, without side-effects, using declarative form field factories. I promise that I will explain this approach in an upcoming tutorial.
 
