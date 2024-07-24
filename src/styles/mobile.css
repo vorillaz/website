@@ -50,6 +50,10 @@
     display: none;
   }
 
+  .content figure {
+    max-width: 100%;
+  }
+
   #nav {
     position: fixed;
     top: 90px;
