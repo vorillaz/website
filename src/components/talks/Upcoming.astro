@@ -18,6 +18,9 @@ const { talks } = Astro.props;
               <div>{talk.data.title}</div>
               <div class="flex center gap-1 center">
                 <span class="flex gap">
+                  <span class="badge mr-1">
+                    <a href={talk.data.url}>{talk.data.conference}</a>
+                  </span>
                   {talk?.data?.ticketUrl && (
                     <span class="badge">
                       <a href={talk.data.ticketUrl}>Tickets</a>

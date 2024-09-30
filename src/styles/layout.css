@@ -173,6 +173,11 @@ select {
   background-color: var(--faded-text);
 }
 
+/* Helpers */
+.mr-1 {
+  margin-right: 1rem;
+}
+
 /* Single page layout */
 .single {
 }
