@@ -17,5 +17,5 @@
     </span>
   {/if}
 {:catch}
-  ds
+  ""
 {/await}

@@ -301,3 +301,32 @@ select {
 .submenu {
   display: none;
 }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  width: 100%;
+}
+
+.tab-list {
+  display: flex;
+  gap: calc(var(--gap) / 2);
+}
+
+.tab-btn {
+  border: 0;
+  background: transparent;
+  color: var(--shiki-tabs-text);
+  background: var(--shiki-tabs-bg);
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tab-btn:hover,
+.tab-btn.selected {
+  background: var(--shiki-tabs-selected-bg);
+  color: var(--shiki-tabs-selected-text);
+}

@@ -7,14 +7,24 @@
   border-top-left-radius: var(--radius);
   border-top-right-radius: var(--radius);
 }
+
+.code-header.shallow {
+  height: 32px;
+  --dot-size: 6px;
+}
+
+.tabbed-code-wrapper,
 .copy-code-wrapper {
   position: relative;
   border: 1px solid var(--code-border);
   border-radius: var(--radius);
 }
+
+.tabbed-code-wrapper pre,
 .copy-code-wrapper pre {
   padding: 4px;
 }
+
 .copy-btn {
   height: 32px;
   width: 32px;
@@ -40,6 +50,7 @@
   color: var(--faded-text);
   font-size: var(--font-tiny);
 }
+
 .copy-btn.fluid .icon-holder {
   width: 24px;
   height: 24px;
@@ -49,10 +60,10 @@
 .copy-btn:hover {
   background: var(--faded-bg);
 }
+
 /* Highlight & diff */
 .line.has-highlight {
   background: var(--highlight);
-  
 }
 
 .diff.add {
@@ -91,6 +102,14 @@
 
 .copy-btn.copied .btn-icon-check {
   animation: code-icon-show 1.25s 0.15s forwards;
+}
+
+/* Dors */
+.t-dot {
+  width: var(--dot-size);
+  height: var(--dot-size);
+  background-color: var(--faded-line);
+  border-radius: 50%;
 }
 
 @keyframes code-icon-hide {
@@ -161,12 +180,22 @@ code {
 
 /* Generics */
 
+.code-leader {
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 24px;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+
+.tabbed-code-wrapper code,
 .copy-code-wrapper code {
   display: grid;
   font-size: 13px;
   line-height: 24px;
   flex-direction: column;
-
 }
 
 .copy-code-wrapper code::before,

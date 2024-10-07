@@ -1,0 +1,26 @@
+---
+import { codeToHtml } from "../../lib/shiki";
+
+const { npm, yarn, pnpm } = Astro.props;
+
+const npmCode = await codeToHtml(`${npm}`, "shell");
+const yarnCode = await codeToHtml(`${yarn}`, "shell");
+const pnpmCode = await codeToHtml(`${pnpm}`, "shell");
+
+import PackageManager from "../tabs/PackageManager.svelte";
+---
+
+<PackageManager
+  client:only="svelte"
+  npmCommand={npm}
+  yarnCommand={yarn}
+  pnpmCommand={pnpm}
+  npmCode={npmCode}
+  yarnCode={yarnCode}
+  pnpmCode={pnpmCode}
+/>
+
+<!-- 
+    A component that displays a package Code with 
+    npm, yarn, and pnpm.
+-->

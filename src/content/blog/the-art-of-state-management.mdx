@@ -13,7 +13,7 @@
   metaDescription: 'Mastering React State Management: A Guide to Context API and Hooks'
 ---
 
-# Mastering React State Management: A Guide to Context API and Hooks
+import Package from '../../components/blocks/Package.astro'
 
 Over the past few years, I've had the privilege (or perhaps the curse) of implementing various state management solutions recommended by the React community in production environments. From Flux and Redux to prop drilling and the Context API, I can totally brag,I've seen it all.
 
@@ -73,11 +73,10 @@ While selectors are often associated with Redux, they can also be used with the 
 
 First, install `use-context-selector`:
 
-```bash
-npm install use-context-selector
-# or
-yarn add use-context-selector
-```
+<Package 
+npm="npm install use-context-selector" 
+yarn="yarn add use-context-selector" 
+pnpm="pnpm add use-context-selector" />
 
 Create a Context object with a default value in `context.js`:
 

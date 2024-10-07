@@ -1,14 +1,4 @@
----
-const props = Astro.props;
----
-
-<svg
-  height="16"
-  {...props}
-  stroke-linejoin="round"
-  viewBox="0 0 16 16"
-  width="16"
->
+<svg stroke-linejoin="round" viewBox="0 0 16 16" height="16" width="16">
   <path
     fill-rule="evenodd"
     clip-rule="evenodd"

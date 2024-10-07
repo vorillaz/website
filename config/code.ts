@@ -49,7 +49,7 @@ const getLanguageName = (lang: string): string => {
 };
 
 const parseMetaBlock = (meta: string) => {
-  if (!meta) return { title: null, meta: "" };
+  if (!meta) return { title: null, meta: "", icon: null };
   const titleMatch = meta.match(/title="([^"]*)"/);
   const title = titleMatch?.[1] ?? null;
   meta = meta.replace(titleMatch?.[0] ?? "", "");
