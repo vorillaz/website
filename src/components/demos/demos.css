@@ -1,0 +1,43 @@
+.select-trigger {
+  display: inline-flex;
+  align-items: center;
+  border-width: 1px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+  width: 296px;
+}
+
+.select-content {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-radius: 0.75rem;
+  border-width: 1px;
+  outline-style: none;
+  width: 100%;
+}
+
+.select-item {
+  all: unset;
+  display: flex;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  padding-right: 0.375rem;
+  padding-left: 1.25rem;
+  align-items: center;
+  outline-style: none;
+  width: 100%;
+  height: 2.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+  transition-duration: 75ms;
+  user-select: none;
+}

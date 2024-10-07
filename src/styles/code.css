@@ -13,6 +13,7 @@
   --dot-size: 6px;
 }
 
+.fake-window,
 .tabbed-code-wrapper,
 .copy-code-wrapper {
   position: relative;

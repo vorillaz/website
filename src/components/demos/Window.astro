@@ -1,8 +1,22 @@
-<div class="window">
-  <div class="window-header">
-    <div class="window-title">
-      <span class="window-icon"></span>
-      <span class="window-title-text">Window Title</span>
+---
+import Selects from "./ux/selects.svelte";
+import "./demos.css";
+---
+
+<div class="fake-window code-header flex space-between center px-1">
+  <div class="code-filename flex center gap-half">
+    <div class="code-icon">
+      <div class="flex gap-half">
+        <div class="t-dot"></div>
+        <div class="t-dot"></div>
+        <div class="t-dot"></div>
+      </div>
     </div>
   </div>
+  <span class="mono small-text lh-1">Window Title</span>
+  <!-- Fake gap -->
+  <span class="mono small-text lh-1"> </span>
+</div>
+<div>
+  <Selects client:only="svelte" />
 </div>

@@ -19,10 +19,12 @@
     "@astrojs/svelte": "^5.2.0",
     "@resvg/resvg-js": "^2.6.0",
     "astro": "^4.5.5",
+    "bits-ui": "^0.21.16",
     "react-tweet": "3.2.0",
     "satori": "^0.10.11",
     "sharp": "^0.33.3",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.3",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@astrojs/markdown-remark": "4.3.0",
