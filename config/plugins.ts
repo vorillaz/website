@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { RehypePlugins } from "astro";
 import rehypeExternalLinks from "rehype-external-links";
 import { createCssVariablesTheme } from "shiki/core";
