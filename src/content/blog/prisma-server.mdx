@@ -1,0 +1,279 @@
+---
+  title: 'From Schema to Server: Automating Documentation and tRPC with Prisma'
+  pubDate: 'Oct 15 2024'
+  status: 'published'
+  categories: ['javascript', 'prisma', "typescript", "trpc", 'ops', 'open-source']
+  description: 'Discover how to leverage your Prisma schema to automatically generate API documentation and tRPC servers.'
+  metaDescription: 'Discover how to leverage your Prisma schema to automatically generate API documentation and tRPC servers.'
+  heroImage: '/imgs/prisma.jpg'
+  imgCredits: {
+    username: 'Artem Artemov',
+    url: 'https://unsplash.com/@artemov'
+  }
+---
+
+import Package from '../../components/blocks/Package.astro'
+import Video from '@/components/Video.astro';
+
+## Grab the code
+You can clone the full tutorial from [GitHub](https://github.com/vorillaz/tutorials/tree/main/prisma-server) or grab the code locally with the following command:
+
+<Package 
+npm="npx ploff https://github.com/vorillaz/tutorials.git -o prisma-server" 
+yarn="yarn dlx ploff https://github.com/vorillaz/tutorials.git -o prisma-server"
+pnpm="pnpm dlx ploff https://github.com/vorillaz/tutorials.git -o prisma-server"
+ />
+
+
+## Prisma As a Source of Truth
+
+[Prisma](https://www.prisma.io/) is a well established ORM for database access and schema management. It's a source of truth for the database layer and works amazingly well with TypeScript and the JavaScript ecosystem. In addition, Prisma provides a powerful set of features for data modeling, migrations, and querying and so on.
+
+In an ideal world, and in most real world scenarios, the Prisma schema is the source of truth for the database. Assuming that all the data is properly modeled, most of the time we are building the API layer on our applications on top of the database schema. In typical CRUD applications, leaving all the middleware, authentication, and other API concerns aside, the API layer is a faithful representation of the database schema. Let's consider the following example:
+
+```ts title="app.ts"
+app.get('/users', async (req, res) => {
+    const users = await prisma.user.findMany();
+    res.json(users);
+});
+
+app.get('/users/:id', async (req, res) => {
+    const user = await prisma.user.findFirst({
+        where: { id: Number(req.params.id) }
+    });
+    res.json(user);
+});
+```
+
+In the above example, we are using Prisma Client to fetch users from the database. The `prisma.user.findMany()` and `prisma.user.findFirst()` methods are used to query the database for all users and a single user by ID, respectively. But what if we want to fetch posts by a user? We can add a new endpoint for that:
+
+```ts title="app.ts"
+app.get('/users/:id/posts', async (req, res) => {
+    const posts = await prisma.post.findMany({
+        where: { authorId: Number(req.params.id) }
+    });
+    res.json(posts);
+});
+```
+
+As the application grows, we might notice that we are duplicating a lot of code across the application, still though the application is directively driven by the database schema. We are just exposing the database operations to the API layer. Every time we add a new field to the database schema, we need to update the API layer to support it. This is not a big deal, but it's a pain in the ass and it's error prone.
+
+But what if we could have a single source of truth for the API layer without having to write any code? What if we could have a single source of truth for the API documentation as well? This is where Prisma generators come into play.
+
+
+
+## Prisma as a Source of Documentation
+Let's start by creating a new Prisma project and add the following schema to it:
+
+```hcl title="schema.prisma" language="prisma"
+datasource db {
+    provider = "sqlite"
+    url      = "file:./sqlite.db"
+}
+
+model User {
+    id    Int    @id @default(autoincrement())
+    email String @unique
+    posts Post[] // relation field (defined only at the Prisma ORM level)
+}
+
+model Post {
+    id       Int    @id @default(autoincrement())
+    title    String
+    author   User   @relation(fields: [authorId], references: [id]) // relation field (uses the relation scalar field `authorId` below)
+    authorId Int // relation scalar field (used in the `@relation` attribute above)
+}
+```
+
+In the above schema, we have two models: `User` and `Post`. The `User` model has a one-to-many relationship with the `Post` model. This means that a user can have many posts and a post belongs to a user. We also have a `Post` model that has a many-to-one relationship with the `User` model. This means that a post can have only one user and a user can have many posts. Finally, we are using the `datasource` stanza to define the database connection. In this case, we are using a local SQLite database.
+
+Prisma has [built-in support](https://www.prisma.io/docs/orm/prisma-schema/overview/generators) for parsing the schema and transforming it into different formats. The default generator is the Prisma Client, which generates a TypeScript / JavaScript client for the database.
+
+
+```hcl title="schema.prisma"
+// ... existing schema
+generator client {
+  provider = "prisma-client-js"
+}
+```
+
+Now we can run the following command to generate the Prisma Client:
+
+<Package 
+  npm="npx prisma generate" 
+  yarn="yarn prisma generate"
+  pnpm="pnpm prisma generate"
+ />
+
+The `prisma generate` command will parse the schema and generate the Prisma Client. The generated client will be placed in the `node_modules/@prisma/client` directory. We can now use the generated client to query the database as follows:
+
+```ts title="app.ts"
+const users = await prisma.user.findMany();
+console.log(users);
+```
+
+## Prisma as a Source of Documentation
+
+As the schema changes, it's a good idea to have a documentation that reflects the current state of the schema along with the available relations. To demonstrate how powerful the Prisma generators are, let's add a new generator to the schema that will generate a documentation website for us.
+
+First we need to install the `prisma-docs-generator` package from npm:
+
+<Package 
+  npm="npm install prisma-docs-generator" 
+  yarn="yarn add prisma-docs-generator"
+  pnpm="pnpm add prisma-docs-generator"
+ />
+
+
+Now let's modify the schema to add the following generator:
+
+
+```hcl title="schema.prisma"
+generator docs {
+    provider = "node node_modules/prisma-docs-generator"
+}
+```
+
+Finally, we can rerun the `prisma generate` command to generate the documentation along with the Prisma Client.
+
+<Package 
+  npm="npx prisma generate" 
+  yarn="yarn prisma generate"
+  pnpm="pnpm prisma generate"
+ />
+
+If you want to see the documentation website, you can run the following command to start the development server along with the documentation as stated in the [`prisma-docs-generator` docs](https://www.npmjs.com/package/prisma-docs-generator), let's add a starting script to the `package.json` file:
+
+```json title="package.json"
+"scripts": {
+    "prisma:docs": "prisma-docs-generator serve",
+}
+```
+
+Running the `pnpm prisma:docs` command will start the development server and open the documentation website in your default browser, the default port is `5858`.
+
+And that was just the beginning of what Prisma can do for us. In the next section, we will see how to use Prisma to generate a tRPC server for actual testing the entire database operations.
+
+## Prisma as a Source of tRPC
+
+Another generator that we can use is the `prisma-trpc-generator` package from npm. This generator will generate all the available tRPC routers based on the schema. For example, for our demo schema with our `User` and `Post` models, the generator will create two routers: one for the `User` model and one for the `Post` model. Each router will all the appropriate [Model queries](https://www.prisma.io/docs/orm/reference/prisma-client-reference#model-queries) exposed as tRPC procedural [Queries](https://trpc.io/docs/server/procedures) or [Mutations](https://trpc.io/docs/server/procedures) accordingly. For example the `User` model will have the following queries:
+
+```ts title="trpc/user.ts"
+export const userRouter = router({
+    // Query
+    findFirstPost: protectedProcedure
+        .input(PostFindFirstSchema).query(async ({ ctx, input }) => {
+        const findFirstPost = await ctx.prisma.post.findFirst(input);
+        return findFirstPost;
+        }),
+
+    // Mutation
+    createOnePost: protectedProcedure
+        .input(PostCreateOneSchema).mutation(async ({ ctx, input }) => {
+        const createOnePost = await ctx.prisma.post.create(input);
+        return createOnePost;
+        }),
+});
+```
+
+Each Prisma query retrieving a single entity will be transformed into a `findUnique` or `findFirst` tRPC query. Each query retrieving a list of entities will be transformed into a `findMany` tRPC query. And each query creating, updating, or deleting a single entity will be transformed into a `create`, `update`, or `delete` tRPC mutation.
+
+Since we have understod how the generator works, let's install the dependencies and attach the generator to the schema:
+
+<Package 
+  npm="npm install prisma-trpc-generator zod" 
+  yarn="yarn add prisma-trpc-generator zod"
+  pnpm="pnpm add prisma-trpc-generator zod"
+ />
+
+```hcl title="schema.prisma"
+generator trpc {
+    provider    = "prisma-trpc-generator"
+    output      = "./trpc" // output directory
+    contextPath = "./ctx" // path to the tRPC context file
+    withShield  = false // disable tRPC shield 
+}
+```
+
+Once done, we can run the `prisma generate` command to generate the tRPC routers. The generated routers will be placed in the `trpc` directory. Keep in mind that we have also installed the `zod` package to help us with the input validation and type inference.
+
+
+## Creating a tRPC Playground.
+
+We can now create a tRPC playground to test our API. We will use the `fastify` framework to create a simple web server that will host our tRPC API, the `@trpc/server` package to create the tRPC server and the [`trpc-playground`](https://www.npmjs.com/package/trpc-playground) package to create the playground UI in order to test our API.
+
+First we need to install the following dependencies:
+
+<Package 
+  npm="npm install fastify trpc-playground @trpc/server fastify-plugin" 
+  yarn="yarn add fastify trpc-playground @trpc/server fastify-plugin"
+  pnpm="pnpm add fastify trpc-playground @trpc/server fastify-plugin"
+ /> 
+
+The last step is to glue everything together. We will create a `src/sever.ts` file that serve the tRPC API and the tRPC playground.
+
+```ts title="src/server.ts"
+import {
+  fastifyTRPCPlugin,
+  FastifyTRPCPluginOptions,
+} from "@trpc/server/adapters/fastify";
+import fastify from "fastify";
+import { playground } from "./playground";
+
+import { appRouter } from "./trpc/routers"; // generated tRPC routers 
+
+const server = fastify();
+
+server.register(fastifyTRPCPlugin, {
+  prefix: "/trpc",
+  trpcOptions: { router: appRouter },
+});
+
+
+server.register(playground);
+
+// Start the server
+(async () => {
+  try {
+    await server.listen({ port: 3000 });
+    server.log.info("Server is running on port 3000");
+
+    server.log.info("Routes:");
+    server.log.info(server.printRoutes());
+  } catch (err) {
+    server.log.error(err);
+    process.exit(1);
+  }
+})();
+```
+
+Now we can start the server and navigate to `http://localhost:3000/trpc-playground` to start testing our API.
+
+<Video src="https://media.giphy.com/media/tAllh0hBG8qsWi2Gfa/source.mp4" />
+
+
+## Exercise
+
+As an exercise, try to add a new model to the schema and generate the tRPC routers and the documentation website, bootstrap the server and test the API using the tRPC playground.
+
+A nice addition is to try to query relational data from the database and see how the generated tRPC routers and the documentation website react to the changes.
+
+As an example we can add a new `Comment` model to the schema:
+
+```hcl title="schema.prisma"
+model Comment {
+    id Int @id @default(autoincrement())
+    content String
+    post Post @relation(fields: [postId], references: [id])
+    postId Int
+}
+```
+
+
+## References
+
+- [Prisma Docs](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/relational-databases/sqlite)
+- [tRPC Docs](https://trpc.io/docs)
+- [prisma-docs-generator](https://www.npmjs.com/package/prisma-docs-generator)
+- [prisma-trpc-generator](https://www.npmjs.com/package/prisma-trpc-generator)
+- [trpc-playground](https://www.npmjs.com/package/trpc-playground)

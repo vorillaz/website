@@ -26,9 +26,9 @@ export async function getCategory(slug: string) {
 }
 
 export async function getPosts() {
-  const posts = (await getCollection("blog")).sort(
-    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
-  );
+  const posts = (await getCollection("blog"))
+    .filter((post) => post.data.status === "published")
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
   return posts;
 }

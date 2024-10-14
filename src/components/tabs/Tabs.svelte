@@ -5,6 +5,14 @@
 <script>
   import { setContext, onDestroy } from "svelte";
   import { writable } from "svelte/store";
+  import { useLocalStorage } from "@/lib/storage";
+  // Props
+  export let persist = false;
+  export let key = "tabs";
+
+  const storage = persist
+    ? useLocalStorage(key)
+    : { get: () => {}, set: () => {} };
 
   const tabs = [];
   const panels = [];
@@ -14,20 +22,24 @@
   setContext(TABS, {
     registerTab: (tab) => {
       tabs.push(tab);
-      selectedTab.update((current) => current || tab);
+      selectedTab.update((current) => {
+        return current || tab;
+      });
 
       onDestroy(() => {
         const i = tabs.indexOf(tab);
         tabs.splice(i, 1);
-        selectedTab.update((current) =>
-          current === tab ? tabs[i] || tabs[tabs.length - 1] : current
-        );
+        selectedTab.update((current) => {
+          return current === tab ? tabs[i] || tabs[tabs.length - 1] : current;
+        });
       });
     },
 
     registerPanel: (panel) => {
       panels.push(panel);
-      selectedPanel.update((current) => current || panel);
+      selectedPanel.update((current) => {
+        return current || panel;
+      });
 
       onDestroy(() => {
         const i = panels.indexOf(panel);
@@ -42,6 +54,7 @@
       const i = tabs.indexOf(tab);
       selectedTab.set(tab);
       selectedPanel.set(panels[i]);
+      storage.set(i);
     },
 
     selectedTab,

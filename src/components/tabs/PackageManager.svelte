@@ -14,7 +14,7 @@
   export let pnpmCommand = "";
 </script>
 
-<Tabs>
+<Tabs persist key="package-manager">
   <Tablist>
     <Tab tabClass="mono">npm</Tab>
     <Tab tabClass="mono">pnpm</Tab>

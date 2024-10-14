@@ -14,7 +14,11 @@ description: "How to build and run a Next.js Docker image with client accessible
 metaDescription: "Learn how to build and run a Next.js Docker image with client accessible envinroment variables using the app router."
 ---
 
+import Package from '../../components/blocks/Package.astro'
+
+
 <Note>The code for this guide is available on [GitHub](https://github.com/vorillaz/tutorials/tree/main/docker-nextjs-env)</Note>
+
 
 In my previous guide [on containerizing Next.js apps](/nextjs-docker), we encountered a notable challenge. Next.js offers two ways to handle environment variables:
 
@@ -22,6 +26,15 @@ In my previous guide [on containerizing Next.js apps](/nextjs-docker), we encoun
 2. Variables without this prefix, such as `MYVAR=1`, are only accessible to server-rendered components and API routes.
 
 This distinction complicates the creation of a Docker image for Next.js apps that require dynamic, browser-accessible environment variables. When using an `.env` file during the Docker build, the variables are statically included in the image, losing their dynamic nature. This is a limitation coming up from the deployment models of platforms like Vercel, which build and deploy code on-the-fly, unlike the pre-packaged approach required for Docker.
+
+## Quick Start
+You can clone the full tutorial from [GitHub](https://github.com/vorillaz/tutorials/tree/main/docker-nextjs-env) or grab the code locally with the following commands:
+
+<Package 
+npm="npx ploff https://github.com/vorillaz/tutorials.git -o docker-nextjs-env" 
+yarn="yarn dlx ploff https://github.com/vorillaz/tutorials.git -o docker-nextjs-env"
+pnpm="pnpm dlx ploff https://github.com/vorillaz/tutorials.git -o docker-nextjs-env"
+ />
 
 ## The Quick and Dirty Solution.
 
