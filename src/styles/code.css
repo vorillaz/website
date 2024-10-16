@@ -34,6 +34,7 @@
   color: var(--text);
   cursor: pointer;
   padding: 0;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -90,6 +91,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
 }
 
 .btn-icon-check {

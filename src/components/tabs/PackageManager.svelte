@@ -35,8 +35,8 @@
       </div>
 
       <Tabpanel>
-        <div class="flex py-almost-half px-1 space-between">
-          <div class="flex gap-half flex-center">
+        <div class="flex py-almost-half px-1 space-between gap-1">
+          <div class="flex gap-half flex-center overflow-y-auto">
             <span class="code-leader">❑</span>
             {@html npmCode}
           </div>
@@ -44,8 +44,8 @@
         </div>
       </Tabpanel>
       <Tabpanel>
-        <div class="flex py-almost-half px-1 space-between">
-          <div class="flex gap-half flex-center">
+        <div class="flex py-almost-half px-1 space-between gap-1">
+          <div class="flex gap-half flex-center overflow-y-auto">
             <span class="code-leader">❑</span>
             {@html pnpmCode}
           </div>
@@ -53,8 +53,8 @@
         </div>
       </Tabpanel>
       <Tabpanel>
-        <div class="flex py-almost-half px-1 space-between">
-          <div class="flex gap-half flex-center">
+        <div class="flex py-almost-half px-1 space-between gap-1">
+          <div class="flex gap-half flex-center overflow-y-auto">
             <span class="code-leader">❑</span>
             {@html yarnCode}
           </div>
