@@ -37,7 +37,9 @@
       <Tabpanel>
         <div class="flex py-almost-half px-1 space-between gap-1">
           <div class="flex gap-half flex-center overflow-y-auto">
-            <span class="code-leader">❑</span>
+            <span class="code-leader">
+              <span>❑</span>
+            </span>
             {@html npmCode}
           </div>
           <CopyBtn code={npmCommand} />
@@ -46,7 +48,7 @@
       <Tabpanel>
         <div class="flex py-almost-half px-1 space-between gap-1">
           <div class="flex gap-half flex-center overflow-y-auto">
-            <span class="code-leader">❑</span>
+            <span class="code-leader"><span>❑</span></span>
             {@html pnpmCode}
           </div>
           <CopyBtn code={pnpmCommand} />
@@ -55,7 +57,9 @@
       <Tabpanel>
         <div class="flex py-almost-half px-1 space-between gap-1">
           <div class="flex gap-half flex-center overflow-y-auto">
-            <span class="code-leader">❑</span>
+            <span class="code-leader">
+              <span>❑</span>
+            </span>
             {@html yarnCode}
           </div>
           <CopyBtn code={yarnCommand} />

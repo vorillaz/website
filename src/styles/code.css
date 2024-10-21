@@ -218,3 +218,12 @@ code {
   counter-reset: line;
   padding: calc(var(--gap)) 0;
 }
+
+/* Scribble */
+
+#draw {
+  border: 2px solid var(--faded-line);
+  border-radius: var(--radius);
+  width: 100%;
+  height: 200px;
+}

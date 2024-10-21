@@ -1,0 +1,131 @@
+---
+pubDate: Oct 21 2024
+title: Next.js Public Variables
+status: published
+categories:
+  - nextjs
+  - environment variables
+description: How to use public variables in Next.js
+---
+
+import Package from '../../components/blocks/Package.astro'
+
+<Note>The full working code for this tutorial is available on [StackBlitz](https://stackblitz.com/edit/nextjs-n8rftr).</Note>
+
+Next.js has been infamously criticized for its handling of environment variables. While it has been improved over the years, it still has some quirks that can be confusing especially when it comes to public variables exposed through the `process.env` object. 
+
+All the `NEXT_PUBLIC_` prefixed variables are client-side accessible, but as mentioned in the [official documentation](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables), they are only available at build time, thus not being able to change at runtime when used with Docker.
+
+Although I've covered this issue in the [past](/nextjs-docker-env), I've found a another approach that might be interesting to explore, using globally shared variables that can be changed at runtime.
+
+## Setup The Polyfill
+
+Global variables are partially supported by Next.js, but we can use a polyfill to make them available using a small injected script.
+
+```tsx title="app/layout.tsx"
+<script
+  dangerouslySetInnerHTML={{
+    __html: `!function(t){function e(){var e=this||self;e.globalThis=e,delete t.prototype._T_}"object"!=typeof globalThis&&(this?e():(t.defineProperty(t.prototype,"_T_",{configurable:!0,get:e}),_T_))}(Object);`,
+  }}
+/>
+```
+
+The original code was taken from [this comment](https://github.com/vercel/next.js/discussions/58818#discussioncomment-8431496) on GitHub, and it basically creates a global `globalThis` object that can be used to share variables between the client and the server. The polyfill is coming with Next.js 14.x, but it seems to break the `globalThis` object in some browsers, that's why we are using the `__html` property to inject the code directly into the page.
+
+## Using Zod To Validate The Variables
+
+Next up, we can use Zod to validate the variables at runtime, and throw an error if the variables are not valid. This step is crucial to ensure that the variables are always available and valid, avoiding runtime errors as well as exposing the application to security issues.
+
+<Package 
+  npm="npm install zod" 
+  yarn="yarn add zod"
+  pnpm="pnpm add zod"
+/>
+
+We then create a `variables.ts` file that will contain some utility functions to grab the variables from `process.env` and safely cast them to the expected type.
+
+```ts title="lib/env.ts"
+import { z } from 'zod';
+
+// Load the variables
+export const load = () => {
+  return process.env;
+};
+
+// Parse or throw the variables
+export function parseOrThrow(schema: z.Schema, data: unknown, error: Error) {
+  const parsed = schema.safeParse(data);
+  // Log the errror
+  if (parsed.success) return parsed.data;
+  console.error(parsed.error);
+  throw error;
+}
+
+// Some zod helpers to use
+export const port = z
+  .string()
+  .refine(
+    (port) => parseInt(port) > 0 && parseInt(port) < 65536,
+    'Invalid port number'
+  );
+
+export const str = z.string();
+export const url = z.string().url();
+export const num = z.coerce.number();
+export const bool = z.coerce.boolean();
+```
+
+`load` is a simple function that returns the `process.env` object, while `parseOrThrow` is a utility function that parses the variables using a Zod schema and throws an error if the variables are not valid.
+
+Finally, we can create a `variables.ts` file that will contain the variables schema and the utility functions to load and parse the variables.
+
+```ts title="lib/vars.ts"
+import { z } from 'zod';
+import { load, parseOrThrow } from './env';
+import { parseOrThrow, load, str, num, bool, port } from './env';
+
+// Define the variables schema
+const schema = z.object({
+  PUBLIC_VARIABLE: str.optional(),
+  PUBLIC_MY_NUM: num,
+  PUBLIC_BOOL: bool,
+  PUBLIC_PORT: port,
+});
+
+export const loadEnv = () => {
+  const env = load();
+  const parsed = parseOrThrow(schema, env, new Error('Invalid variables'));
+  for (const key of Object.keys(parsed)) {
+    if (!globalThis[key]) {
+      globalThis[key] = parsed[key];
+    }
+  }
+};
+```
+
+## Using The Variables
+
+In order to use the variables, we need to load them first. We can do that in the `app/layout.tsx` file or any other layout file to gradually expose them to the rest of the application, both on the client and the server.
+
+```tsx title="app/layout.tsx"
+import { loadEnv } from '@/lib/vars';
+
+loadEnv();
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+## References
+
+- [Next.js Environment Variables](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables)
+- [Next.js GitHub Discussion](https://github.com/vercel/next.js/discussions/58818)

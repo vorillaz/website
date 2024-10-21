@@ -1,0 +1,55 @@
+---
+
+---
+
+<div id="fill">
+  <pre>Konami</pre>
+</div>
+
+<script is:inline>
+  const audio = new Audio("/konami/toasty.mp3");
+  const allowedKeys = {
+    37: "left",
+    38: "up",
+    39: "right",
+    40: "down",
+    65: "a",
+    66: "b",
+  };
+  const konamiCode = [
+    "up",
+    "up",
+    "down",
+    "down",
+    "left",
+    "right",
+    "left",
+    "right",
+    "b",
+    "a",
+  ];
+
+  let pressedKeys = [];
+
+  const enter = () => {
+    const toasty = document.querySelector("#toasty");
+    toasty.classList.add("toasty-in");
+    audio.play();
+    setTimeout(() => {
+      toasty.classList.remove("toasty-in");
+    }, 2000);
+  };
+  // Listen for keydown events
+  document.addEventListener("keydown", (e) => {
+    const pressed = allowedKeys[e.keyCode];
+    if (pressed) {
+      pressedKeys.push(pressed);
+    }
+    // Check if the konami code has been entered
+    const sliced = pressedKeys.slice(-konamiCode.length);
+    if (konamiCode.join("-") === sliced.join("-")) {
+      enter();
+      pressedKeys = [];
+    }
+  });
+</script>

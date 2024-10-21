@@ -33,6 +33,10 @@ const { pathname } = url;
         <li class={isSelected(pathname === "/talks")}>
           <a href="/talks"><span>Speaking</span></a>
         </li>
+        <li class={isSelected(pathname === "/scribble")}>
+          <a class="scribble" href="/scribble"><span>Scribble</span></a>
+          <span class="squiggle"></span>
+        </li>
       </ul>
       <div class="submenu">
         <a

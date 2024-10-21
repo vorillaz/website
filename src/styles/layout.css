@@ -29,6 +29,7 @@
 
 .menu > li {
   list-style: none;
+  position: relative;
 }
 
 .menu > li.selected > a,
@@ -38,12 +39,42 @@
   border-bottom: var(--border) solid var(--text);
 }
 
+.menu > li:hover > a {
+  border-bottom: 0;
+}
+
+.scribble {
+  position: relative;
+}
+
+.squiggle {
+  display: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--text);
+  mask: url("data:image/svg+xml;charset=utf8,%3Csvg id='squiggle-link' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:ev='http://www.w3.org/2001/xml-events' viewBox='0 0 20 4'%3E%3Cstyle type='text/css'%3E.squiggle{animation:shift .3s linear infinite;}@keyframes shift {from {transform:translateX(0);}to {transform:translateX(-20px);}}%3C/style%3E%3Cpath fill='none' stroke='%23ff9800' stroke-width='2' class='squiggle' d='M0,3.5 c 5,0,5,-3,10,-3 s 5,3,10,3 c 5,0,5,-3,10,-3 s 5,3,10,3'/%3E%3C/svg%3E");
+  border-bottom: 0;
+  background-color: var(--text);
+  padding-bottom: 1px;
+}
+.menu > li:hover .scribble span {
+  border-bottom: 0;
+}
+
+.menu > li:hover .squiggle {
+  display: block;
+}
+
 /* Page */
 .page {
   display: flex;
   flex-direction: column;
   gap: 50px;
   align-items: center;
+  position: relative;
 }
 
 .content {
@@ -329,4 +360,32 @@ select {
 .tab-btn.selected {
   background: var(--shiki-tabs-selected-bg);
   color: var(--shiki-tabs-selected-text);
+}
+
+.toasty-container {
+  position: relative;
+}
+
+#toasty {
+  width: 200px;
+  height: 200px;
+  position: fixed;
+  right: -220px;
+  bottom: 0;
+}
+
+.toasty-in {
+  animation: 2s toasted forwards ease;
+}
+
+@keyframes toasted {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-220px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
