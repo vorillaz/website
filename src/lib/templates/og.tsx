@@ -2,9 +2,9 @@ export default ({ title = "Welcome" }: { title: string }) => {
   return (
     <div
       style={{
-        background: "#fefbfb",
-        backgroundColor: "#fdfbfb",
-        backgroundImage: "linear-gradient(-20deg, #e9defa 0%, #fbfcdb 100%)",
+        background: "#ffee39",
+        backgroundColor: "#ffee39",
+        backgroundImage: "linear-gradient(-20deg, #fef151 0%, #ffee39 100%)",
         width: "100%",
         height: "100%",
         display: "flex",
@@ -16,7 +16,7 @@ export default ({ title = "Welcome" }: { title: string }) => {
         style={{
           display: "flex",
           flexDirection: "column",
-          width: "90%",
+          width: "85%",
           height: "80%",
         }}
       >
@@ -38,8 +38,8 @@ export default ({ title = "Welcome" }: { title: string }) => {
             }}
           >
             <svg
-              width="80"
-              height="80"
+              width="130"
+              height="130"
               viewBox="0 0 554 554"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -61,7 +61,7 @@ export default ({ title = "Welcome" }: { title: string }) => {
             <div
               style={{
                 fontSize: 40,
-                color: "#64645e",
+                color: "rgba(0, 0, 0, .51)",
                 lineHeight: "30px",
                 marginBottom: "10px",
               }}
