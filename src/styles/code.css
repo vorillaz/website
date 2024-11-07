@@ -180,6 +180,7 @@ code {
   font-size: medium;
   font-feature-settings: "ss09", none;
   font-variant-ligatures: none;
+  text-wrap: auto;
 }
 
 /* Generics */

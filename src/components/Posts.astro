@@ -46,7 +46,7 @@ const headingClass = clx + " flex align-center gap-1";
         paginatedPosts.map(({ data, slug }) => (
           <li class="flex gap-half flex-column">
             <div class="flex space-between align-top gap-1 sm-flex-column sm-only-gap-fifth">
-              <a href={`/${slug}`} data-astro-prefetch>
+              <a href={`/${slug}`} data-astro-prefetch="viewport">
                 <span>{data.title}</span>
               </a>
               <time class="post-info sm-ml-0">

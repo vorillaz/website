@@ -18,14 +18,18 @@ const next = currentPage < totalPages ? "" : "disabled";
       <nav aria-label="Pagination" class="flex gap-1 small-text">
         {prev === "disabled" && <span aria-disabled>Previous</span>}
         {prev !== "disabled" && (
-          <a aria-label="Previous">
+          <a
+            aria-label="Previous"
+            data-astro-prefetch="viewport"
+            href={prevUrl}
+          >
             <span>Previous</span>
           </a>
         )}
         {currentPage} / {totalPages}
         {next === "disabled" && <span aria-disabled>Next</span>}
         {next !== "disabled" && (
-          <a href={nextUrl} aria-label="Next">
+          <a href={nextUrl} aria-label="Next" data-astro-prefetch="viewport">
             <span>Next</span>
           </a>
         )}

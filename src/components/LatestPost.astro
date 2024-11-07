@@ -6,7 +6,7 @@ const { slug, data } = post;
 
 <span>
   <span>My latest post is </span>
-  <a class="big-link" href={slug}>{data?.title}</a>
+  <a class="big-link" data-astro-prefetch href={slug}>{data?.title}</a>
   and while you're here, you can check some <a class="big-link" href="/art">
     visuals I made
   </a>.
