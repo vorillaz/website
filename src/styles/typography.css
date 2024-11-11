@@ -100,6 +100,11 @@ code {
   font-size: inherit;
 }
 
+.font-mono {
+  font-family: Mono Lisa, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    Liberation Mono, Courier New, monospace;
+}
+
 /* Sizes and helpers */
 .small-text {
   font-size: var(--font-small);
