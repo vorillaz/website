@@ -1,44 +1,41 @@
 ---
-  pubDate: 'Feb 3 2025'
-  status: 'draft'
+  pubDate: 'Feb 5 2025'
+  status: 'published'
   title: 'Netflix But better'
   categories: ['netflix', 'javascript', 'node-js', 'ai']
   keywords: ['netflix', 'ai', 'JavaScript']
-  heroImage: '/imgs/getting-started-javascript-iot.jpg'
+  heroImage: '/imgs/clack.jpg'
   imgCredits: {
-    username: 'Felipe Faria',
-    url: 'https://unsplash.com/@felipefsf'
+    username: 'Jakob Owens',
+    url: 'https://unsplash.com/@jakobowens1'
   }
   description: 'A Netflix clone with better search and recommendations'
   metaDescription: 'A tutorial on how to build a Netflix clone with better search and recommendations using Drizzle, Vercel AI SDK and pgvector'
 ---
 
-import Package from '../../components/blocks/Package.astro'
 
 <Note>Attention: This project is not affiliated with Netflix, it's just a fun experiment.</Note>
 
-<Package 
-npm="npm install ai @ai-sdk/openai zod" 
-yarn="yarn add ai @ai-sdk/openai zod" 
-pnpm="pnpm add ai @ai-sdk/openai zod" />
-
 
 ## Why We Need a Better Netflix
-Netflix is the number one streaming service in the world, with more than 200 million subscribers. It has over 17000 movies and TV shows from all over the world and that list keeps growing.
-One of the best features of Netflix is the search and recommendations system, according to [Netflix](https://help.netflix.com/en/node/100639/) their system recommends new show based on your viewing history, other shows that are similar to the ones you've watched, other users' viewing history and other shows that are popular. But what if we could try to replicate that system without extensive usage of additional data or sophisticated algorithms?
+Netflix is the undisputed leader in streaming, with over 200 million subscribers. It offers a library of more than 17000 movies and TV shows from across the globe, and this catalog continues to expand.
 
-In this project we'll try to build a Netflix clone with direct search capabilities, a vector based recommendation system and a way to get recommendations based on AI generated content.
+One of the major features of the platform is its recommendation system. According to [Netflix](https://help.netflix.com/en/node/100639/), the platform suggests new content based on your viewing history, similar shows, trends from other users, and popular titles. But what if we could replicate this system without relying too heavily on extensive data sets or complex algorithms?
+
+In this project, we'll try to build a simple movie recommendation system that includes direct search capabilities, a vector-based recommendation engine, and a way to make recommendations using AI-generated content.
 
 ## The Tech Stack
-The main application is built with Next.js, TailwindCSS and Shadcn UI. Actually the idea of building such a project was based on a talk by [Tejas Kumar](https://www.youtube.com/watch?v=COIpsrgy1a0) where he builts a movie recommendation system using Datastax. The tech stack used on the other hand was highly inspired by [the book inventory](https://github.com/vercel-labs/book-inventory) project created by [Lee Robinson](https://leerob.com/).
+For this application, the foundation is built on Next.js, TailwindCSS, and Shadcn UI. The idea for the project came from a talk by [Tejas Kumar](https://www.youtube.com/watch?v=COIpsrgy1a0), where he developed a movie recommendation system using Datastax. Our tech stack, however, draws significant inspiration from [the book inventory](https://github.com/vercel-labs/book-inventory) project by [Lee Robinson](https://leerob.com/).
 
-In order to make the project project snappy, we'll use the [SSR capabilities](https://nextjs.org/docs/pages/building-your-application/rendering/server-side-rendering) of Next.js and the Image component to pre-render the images, along with aggresive prefetching of each page.
+To ensure fast performance, we'll utilize Next.js's [SSR capabilities](https://nextjs.org/docs/pages/building-your-application/rendering/server-side-rendering), along with its Image component to pre-render images and aggressive prefetching of each page.
 
-All the data is stored in a [Neon](https://neon.tech/) database, which is a cloud PostgreSQL database. The [Vercel AI SDK](https://sdk.vercel.ai/) is used to generate the embeddings and the search queries and finally [Drizzle](https://orm.drizzle.team/) is used to interact with the database.
+Data storage will be handled by a [Neon](https://neon.tech/) cloud PostgreSQL database, while the [Vercel AI SDK](https://sdk.vercel.ai/) will power our embeddings and search queries. Finally, [Drizzle](https://orm.drizzle.team/) will serve as the ORM to interact with the database.
 
 
 ## Feeding the Data
-There is an open source dataset with more than 8000 movies and TV shows from [Kaggle](https://www.kaggle.com/datasets/satpreetmakhija/netflix-movies-and-tv-shows-2021). The original dataset is a CSV file which we can directly import into the database to get started. Additionally, I've used the [OMDB API](https://www.omdbapi.com/) to get the poster images and the IMDB scores for each show.
+We’ll start by using an open-source dataset containing over 8,000 movies and TV shows, available on [Kaggle](https://www.kaggle.com/datasets/satpreetmakhija/netflix-movies-and-tv-shows-2021). The dataset is in CSV format, which we can import directly into the database to get started. Additionally, the [OMDB API](https://www.omdbapi.com/) is used to fetch poster images and IMDb scores for each title.
+
+<Note>The demo csv file uses `cast` as a column name, but in the database we'll use `_cast` as a column name to avoid conflicts with the `cast` function.</Note>
 
 ```sql
 COPY tmp_titles(show_id, title, description, director, genres, _cast, production_country, release_date, rating, duration)
@@ -47,9 +44,10 @@ DELIMITER ','
 CSV HEADER;
 ```
 
-Since we need to add relationships between the tables, we'll create a few new tables alongside a `shows` table which will be the main source of data for the application.
+We’ll need to establish relationships between our tables, so we’ll create a few additional tables alongside a `shows` table to serve as the main source of data for our application.
 
-The main shows table will have the following columns:
+Here's how we can define the `shows` table:
+
 ```sql
 CREATE TABLE "shows" (
 	"id" serial PRIMARY KEY NOT NULL,
@@ -64,9 +62,8 @@ CREATE TABLE "shows" (
 );
 ```
 
-Using the `shows` table we can now create all the relationships between the tables.
+Next, we'll create a table for actors and set up many-to-many relationships between the `shows` and `actors` tables:
 
-As an example, we'll create a `actors` table with the following columns:
 ```sql
 CREATE TABLE "actors" (
 	"id" serial PRIMARY KEY NOT NULL,
@@ -81,7 +78,7 @@ CREATE TABLE "show_actors" (
 );
 ```
 
-In this way we can create a many-to-many relationship between the `shows` table and the `actors` table. Next up, we can recursively create connections between the actors and the shows they've been in, in order to do so we need to match the shows from `tmp_titles` to the `shows` table and parse the `cast` column to get the actors and associate them with the show using a recursive query.
+This allows us to establish connections between shows and their actors. We can continue by recursively linking actors to the shows they've appeared in. This is done by matching the shows from the `tmp_titles` table with the `shows` table and parsing the `_cast` column to associate actors with their respective shows.
 
 ```sql
 -- Insert actors from tmp_titles._cast into actors table
@@ -98,16 +95,16 @@ WHERE actor_name != '' -- Skip empty strings
     ON CONFLICT (name) DO NOTHING;
 ```
 
-Using the same technique we will also update the `categories`, `directors` and `countries` tables.
+This same process can be applied to the `categories`, `directors`, and `countries` tables.
 
 ## Full Text Search
 
-Since we need to perform full text search on the `shows` table, we'll create a `search_text` column in the `shows` table and populate it with the `title`, `description`, `content_type`, `actors`, `directors` and `categories` columns. In order to do so we'll use the `pg_trgm` extension.
+To improve search capabilities, we’ll add a `search_text` column to the `shows` table. This column will store a combination of text from the `title`, `description`, `content_type`, `actors`, `directors`, and `categories` columns, making it easier to perform full-text search queries.
 
-In PostgreSQL, the `pg_trgm` extension improves text search capabilities through trigram analysis. It works by dividing text into three-character sequences, which enables more sophisticated and precise search techniques. This approach allows the database to conduct advanced searches that can detect similarities and proximity between text strings, making text matching more nuanced and flexible. 
+We’ll utilize PostgreSQL’s `pg_trgm` extension to improve text search performance, which breaks down text into three-character sequences for more efficient matching.
 
 ```sql
--- Create the extension
+-- Create the extension for text search
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 -- Add the search_text column
 ALTER TABLE "shows"
@@ -117,7 +114,8 @@ ADD COLUMN "search_text" text;
 CREATE INDEX "idx_shows_search_text_tsv" ON "shows" USING gin (to_tsvector('english', "search_text"));
 ```
 
-Once the migration is done, we can now populate the `search_text` column with a simple script:
+Once this migration is completed, we can populate the `search_text` column using a simple script:
+
 ```ts
 import { db } from '@/lib/db';
 
@@ -139,7 +137,8 @@ for (const show of batch) {
   }
 ```
 
-On the server side we can now perform a full text search on the `shows` table using the `search_text` column.
+Now, with everything set up, we can perform full-text searches using the `search_text` column on the server side:
+
 
 ```ts
 const exactMatches = await db
@@ -157,21 +156,23 @@ const exactMatches = await db
     .limit(10);
 ```
 
-The `tsvector` and `tsquery` functions are used to create a vector and a query from the `search_text` column. The `@@` operator is used to check if the vector matches the query.
+The `tsvector` and `tsquery` functions are used to match the vector and the query against the `search_text` column.
 
 ## Vector Search with AI Embeddings
 
-While the full text search is a quite powerful feature, it's not enough to get the best results. 
-We want to be able to search for shows that are similar to a given show or arbitrary semantic queries. Using the [Vercel AI SDK](https://sdk.vercel.ai/) we can easily create an agnostic AI client that can be used to enhance the associated metadata for each show.
+While full-text search provides powerful functionality, it doesn’t fully meet our needs. We also want to support semantic searches, where users can find shows that are similar to a given title or based on abstract criteria.
 
-First we need to create a client to interact with an AI model. In this example we'll Mistral as an object detection model.
+This is where the [Vercel AI SDK](https://sdk.vercel.ai/) comes in. With the AI SDK, we can easily create a client that generates embeddings—vector representations of the metadata—enabling semantic search capabilities.
+
+For the object detection model, we’ll use Mistral:
 
 ```ts
 import { mistral } from "@ai-sdk/mistral";
 export const objectModel = mistral("mistral-large-latest", {});
 ```
 
-The AI SDK allows us to generate objects from a given schema. In this case we'll generate a `showMetadata` object with the following schema:
+Next, we define the Zod schema for show metadata that the AI will use to generate embeddings:
+
 ```ts
 const showMetadataSchema = z.object({
   mood: z.array(z.string()).optional(),
@@ -186,7 +187,9 @@ const showMetadataSchema = z.object({
 });
 ```
 
-And then we can ask the AI to generate an object from the schema passing the show information to the AI.
+Using this schema, we can ask the AI model to analyze a show’s information and generate metadata in the required format.
+
+
 ```ts
 const result = await generateObject({
     // @ts-ignore
@@ -220,7 +223,7 @@ const result = await generateObject({
   });
 ```
 
-The returned object for Breaking Bad is the following:
+The result could look like this for **Breaking Bad**:
 ```json
 {
   "mood": [
@@ -274,7 +277,9 @@ The returned object for Breaking Bad is the following:
 }
 ```
 
-Using this metadata we can now store the embeddings for each show in the `shows` table, an embedding is a vector representation of the show metadata and allows us to perform vector search on the `shows` table. In order to do so we'll use the `vector` extension.
+With this metadata in hand, we can store the embeddings for each show in the `shows` table and enable vector search. First, we create the necessary extension and add a new column to the table.
+
+<Note>The embedding column is a vector of size 1024, which is the default size for the Mistral model.</Note>
 
 ```sql
 -- Create the extension
@@ -286,7 +291,9 @@ ADD COLUMN "embedding" vector(1024);
 CREATE INDEX "embeddingIndex" ON "shows" USING ivfflat ("embedding" vector_cosine_ops);
 ```
 
-Once the extension is created, we can now store the embeddings for each show in the `shows` table. Using the `embed` function from the AI SDK we can generate the embedding for the show metadata and store it in the `embedding` column.
+Once the extension is set up, we generate and store the embeddings using the AI SDK:
+
+
 
 ```ts
 import { mistral } from "@ai-sdk/mistral";
@@ -307,7 +314,7 @@ const embedding = await embed(`
 await db.update(shows).set({ embedding }).where(eq(shows.id, show.id));
 ```
 
-Using the `embedding` column we can now perform a vector search on the `shows` table and get similar shows or shows that match a given query.
+With the embeddings in place, we can query the nearest neighbors for any given show:
 
 ```ts
 const query = "A show with strong female characters";
@@ -325,10 +332,22 @@ const results = await db
 
     // Returns Borgen, Gilmore Girls, La Femme etc.
 ```
-    
+
+
+## Moving Forward
+If you want to try this out for yourself, you can clone the repository and run the project locally. You can find the repository [here](https://github.com/vorillaz/netflix-but-better) and the live demo [here](https://netflix-but-better.vercel.app/).
+
+Try to add a new feature to the project, for example add a new type of recommendation or improve the search functionality using different models like OpenAI or Gemini. Additionally you can also expand the dataset to include more shows and movies as well as try to add more metadata to the shows.
+
+## Final Thoughts
+In conclusion, by leveraging simple yet effective technologies like PostgreSQL, Next.js, and AI-driven embeddings, we can build a highly functional and scalable recommendation engine for a any data heavy platform. 
+The combination of full-text search and semantic AI search provides a more robust, personalized experience, allowing users to discover content that resonates with them based on both explicit and inferred preferences. 
+
 
 ## Further reading
 - [pgvector](https://github.com/pgvector/pgvector)
 - [pg_trgm](https://www.postgresql.org/docs/current/pgtrgm.html)
-- [AI SDK](https://sdk.vercel.ai/)
+- [Drizzle](https://orm.drizzle.team/)
+- [Vercel AI SDK](https://sdk.vercel.ai/)
+- [Vector Search in Postgres](https://neon.tech/docs/extensions/pgvector)
 - [Vector Similarity with Drizzle](https://orm.drizzle.team/docs/guides/vector-similarity-search)
